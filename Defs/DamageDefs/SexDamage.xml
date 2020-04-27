@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<DamageDef Name="Rub">
+		<defName>Rub</defName>
+		<label>rub</label>
+		<!--workerClass>DamageWorker_Scratch</workerClass-->
+		<externalViolence>true</externalViolence>
+		<makesBlood>false</makesBlood>
+		<canInterruptJobs>false</canInterruptJobs>
+		<deathMessage>{0} has been fucked to death.</deathMessage>
+		<hediff>Abrasion</hediff>
+		<harmAllLayersUntilOutside>false</harmAllLayersUntilOutside>
+		<overkillPctToDestroyPart>0~1</overkillPctToDestroyPart>
+		<scratchSplitPercentage>0.67</scratchSplitPercentage>
+	</DamageDef>
+
+	<DamageDef Name="Stretch">
+		<defName>Stretch</defName>
+		<label>stretch</label>
+		<!--workerClass>DamageWorker_Scratch</workerClass-->
+		<externalViolence>true</externalViolence>
+		<makesBlood>false</makesBlood>
+		<canInterruptJobs>false</canInterruptJobs>
+		<deathMessage>{0} has been fucked to death.</deathMessage>
+		<hediff>Rupture</hediff>
+		<harmAllLayersUntilOutside>false</harmAllLayersUntilOutside>
+		<impactSoundType>Slice</impactSoundType>
+		<overkillPctToDestroyPart>0~0.7</overkillPctToDestroyPart>
+		<scratchSplitPercentage>0.67</scratchSplitPercentage>
+	</DamageDef>
+</Defs>

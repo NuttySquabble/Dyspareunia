@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<HediffDef ParentName="InjuryBase">
+		<defName>Abrasion</defName>
+		<label>abrasion</label>
+		<labelNoun>an abrasion</labelNoun>
+		<description>Too much rubbing damaged the tender skin.</description>
+		<comps>
+			<li Class="HediffCompProperties_TendDuration">
+				<labelTendedWell>plastered</labelTendedWell>
+				<labelTendedWellInner>treated</labelTendedWellInner>
+				<labelSolidTendedWell>set</labelSolidTendedWell>
+			</li>
+			<li Class="HediffCompProperties_Infecter">
+				<infectionChance>0.1</infectionChance>
+			</li>
+			<li Class="HediffCompProperties_GetsPermanent">
+				<permanentLabel>abrasion scar</permanentLabel>
+			</li>
+		</comps>
+		<displayWound>false</displayWound>
+		<injuryProps>
+			<painPerSeverity>0.0125</painPerSeverity>
+			<averagePainPerSeverityPermanent>0.00625</averagePainPerSeverityPermanent>
+			<destroyedLabel>Torn off</destroyedLabel>
+			<destroyedOutLabel>Torn out</destroyedOutLabel>
+		</injuryProps>
+	</HediffDef>
+
+	<HediffDef ParentName="InjuryBase">
+		<defName>Rupture</defName>
+		<label>rupture</label>
+		<labelNoun>a rupture</labelNoun>
+		<description>Tear caused by a strong stretch.</description>
+		<comps>
+			<li Class="HediffCompProperties_TendDuration">
+				<labelTendedWell>bandaged</labelTendedWell>
+				<labelTendedWellInner>sutured</labelTendedWellInner>
+				<labelSolidTendedWell>set</labelSolidTendedWell>
+			</li>
+			<li Class="HediffCompProperties_Infecter">
+				<infectionChance>0.15</infectionChance>
+			</li>
+			<li Class="HediffCompProperties_GetsPermanent">
+				<permanentLabel>rupture scar</permanentLabel>
+			</li>
+		</comps>
+		<displayWound>false</displayWound>
+		<injuryProps>
+			<painPerSeverity>0.0125</painPerSeverity>
+			<averagePainPerSeverityPermanent>0.00625</averagePainPerSeverityPermanent>
+			<bleedRate>0.06</bleedRate>
+			<canMerge>true</canMerge>
+			<destroyedLabel>Torn off</destroyedLabel>
+			<destroyedOutLabel>Torn out</destroyedOutLabel>
+		</injuryProps>
+	</HediffDef>
+</Defs>
