@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
-	<HediffDef ParentName="InjuryBase">
+	<HediffDef Name="SexInjuryBase" ParentName="InjuryBase" Abstract="True">
+		<displayWound>false</displayWound>
+	</HediffDef>
+
+	<HediffDef ParentName="SexInjuryBase">
 		<defName>Abrasion</defName>
 		<label>abrasion</label>
 		<labelNoun>an abrasion</labelNoun>
@@ -19,7 +23,6 @@
 				<permanentLabel>abrasion scar</permanentLabel>
 			</li>
 		</comps>
-		<displayWound>false</displayWound>
 		<injuryProps>
 			<painPerSeverity>0.0125</painPerSeverity>
 			<averagePainPerSeverityPermanent>0.00625</averagePainPerSeverityPermanent>
@@ -28,7 +31,7 @@
 		</injuryProps>
 	</HediffDef>
 
-	<HediffDef ParentName="InjuryBase">
+	<HediffDef ParentName="SexInjuryBase">
 		<defName>Rupture</defName>
 		<label>rupture</label>
 		<labelNoun>a rupture</labelNoun>
@@ -46,7 +49,6 @@
 				<permanentLabel>rupture scar</permanentLabel>
 			</li>
 		</comps>
-		<displayWound>false</displayWound>
 		<injuryProps>
 			<painPerSeverity>0.0125</painPerSeverity>
 			<averagePainPerSeverityPermanent>0.00625</averagePainPerSeverityPermanent>

@@ -49,7 +49,7 @@ namespace Dyspareunia
                 return;
             }
             Dyspareunia.Log("Hediff def: " + hediffDef);
-            DamageDef damageDef = DefDatabase<DamageDef>.GetNamed("Rub");
+            DamageDef damageDef = DefDatabase<DamageDef>.GetNamed("SexRub");
             if (damageDef == null)
             {
                 Dyspareunia.Log("No DamageDef 'Rub' found.");
@@ -57,6 +57,7 @@ namespace Dyspareunia
             }
             Dyspareunia.Log("Damage def: " + damageDef);
             DamageInfo damageInfo = new DamageInfo(damageDef, (float)rubbingDamage, hitPart: orifice.Part);
+            damageInfo.SetIgnoreArmor(true);
             Target.health.AddHediff(hediffDef, orifice.Part, damageInfo);
             Dyspareunia.Log("Abrasion hediff added.");
 
@@ -71,7 +72,7 @@ namespace Dyspareunia
                     return;
                 }
                 Dyspareunia.Log("Hediff def: " + hediffDef);
-                damageDef = DefDatabase<DamageDef>.GetNamed("Stretch");
+                damageDef = DefDatabase<DamageDef>.GetNamed("SexStretch");
                 if (damageDef == null)
                 {
                     Dyspareunia.Log("No DamageDef 'Stretch' found.");
@@ -79,6 +80,7 @@ namespace Dyspareunia
                 }
                 Dyspareunia.Log("Damage def: " + damageDef);
                 damageInfo = new DamageInfo(damageDef, (float)stretchDamage, hitPart: orifice.Part);
+                damageInfo.SetIgnoreArmor(true);
                 Target.health.AddHediff(hediffDef, orifice.Part, damageInfo);
                 Dyspareunia.Log("Abrasion hediff added.");
             }
