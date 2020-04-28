@@ -96,8 +96,8 @@ namespace Dyspareunia
             Log("* Partner *");
             LogPawnData(partner);
 
-            foreach (PenetrationInfo penetration in PenetrationInfo.GetPenetrationInfo(pawn, partner, rape, sextype))
-                penetration.ApplyDamage();
+            PenetrationUtility.ProcessPenetrations(pawn, partner, rape, sextype);
+
             List<LogEntry> entries = Find.PlayLog.AllEntries;
             for (int i = 0; i < entries.Count; i++)
                 if ((entries[i] is PlayLogEntry_Interaction logEntry) && (logEntry.Concerns(pawn) && logEntry.Concerns(partner)))
