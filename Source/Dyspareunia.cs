@@ -101,7 +101,10 @@ namespace Dyspareunia
             List<LogEntry> entries = Find.PlayLog.AllEntries;
             for (int i = 0; i < entries.Count; i++)
                 if ((entries[i] is PlayLogEntry_Interaction logEntry) && (logEntry.Concerns(pawn) && logEntry.Concerns(partner)))
+                {
                     Log("Log entry #" + (i + 1) + "/" + entries.Count + " (" + logEntry.Age + " ticks ago): " + logEntry);
+                    break;
+                }
         }
 
         public static void JobDriver_SexBaseInitiator_Postfix(JobDriver_SexBaseInitiator __instance)

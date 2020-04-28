@@ -9,7 +9,7 @@ namespace Dyspareunia
     {
         public Hediff penetratingOrgan;  // The part (or rather, hediff) that does the actual penetration, e.g. dick
         public Hediff orifice;  // The part (or rather, hediff) that is being penetrated, e.g. vagina or anus
-        bool isRape;
+        public bool isRape;
 
         public Pawn Penetrator => penetratingOrgan.pawn;
         public Pawn Target => orifice.pawn;
@@ -21,7 +21,9 @@ namespace Dyspareunia
             this.isRape = isRape;
         }
 
-        public static double GetOrganSize(Hediff organ) => (1 + organ.Severity) * organ.pawn.BodySize;  // Assume max natural organ size is 2x bigger than the smallest
+        // Returns the size of an organ; 0.5 to 1.5 for (normal) anus; 1 to 2 for other organs
+        public static double GetOrganSize(Hediff organ) =>
+            ((organ.def.defName.ToLower().Contains("anus") ? 0.5 : 1) + organ.Severity) * organ.pawn.BodySize;  // Assume max natural organ size is 2x bigger than the smallest
 
         public double RelativeOrgansSize => GetOrganSize(penetratingOrgan) / GetOrganSize(orifice);
 
@@ -33,7 +35,7 @@ namespace Dyspareunia
             double rubbingDamage = 1;
             double stretchDamage = Math.Max(RelativeOrgansSize - 1, 0);
 
-            if (RelativeOrgansSize < 1.2) rubbingDamage *= 0.5; // If penetrating organ is smaller than the orifice, rubbing damage is smaller
+            if (RelativeOrgansSize < 1.2) rubbingDamage *= 0.5; // If penetrating organ is smaller than the orifice, rubbing damage is lower
             if (isRape) // Rape is rough
             {
                 rubbingDamage *= 2; 
@@ -56,7 +58,7 @@ namespace Dyspareunia
                 return;
             }
             Dyspareunia.Log("Damage def: " + damageDef);
-            DamageInfo damageInfo = new DamageInfo(damageDef, (float)rubbingDamage, hitPart: orifice.Part);
+            DamageInfo damageInfo = new DamageInfo(damageDef, (float)rubbingDamage, instigator: Penetrator, hitPart: orifice.Part);
             damageInfo.SetIgnoreArmor(true);
             Target.health.AddHediff(hediffDef, orifice.Part, damageInfo);
             Dyspareunia.Log("Abrasion hediff added.");
@@ -79,10 +81,10 @@ namespace Dyspareunia
                     return;
                 }
                 Dyspareunia.Log("Damage def: " + damageDef);
-                damageInfo = new DamageInfo(damageDef, (float)stretchDamage, hitPart: orifice.Part);
+                damageInfo = new DamageInfo(damageDef, (float)stretchDamage, instigator: Penetrator, hitPart: orifice.Part);
                 damageInfo.SetIgnoreArmor(true);
                 Target.health.AddHediff(hediffDef, orifice.Part, damageInfo);
-                Dyspareunia.Log("Abrasion hediff added.");
+                Dyspareunia.Log("Stretch hediff added.");
             }
         }
 
