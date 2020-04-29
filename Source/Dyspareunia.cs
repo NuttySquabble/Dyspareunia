@@ -20,15 +20,7 @@ namespace Dyspareunia
             harmony = new Harmony("nuttysquabble.dyspareunia");
             Harmony.DEBUG = true;
 
-            //HarmonyMethod postfix = new HarmonyMethod(typeof(Dyspareunia).GetMethod("JobDriver_Postfix"));
-            //if (postfix is null)
-            //{
-            //    Log("Postfix is NULL!");
-            //    return;
-            //}
-
             harmony.Patch(typeof(SexUtility).GetMethod("ProcessSex"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Postfix")));
-            //harmony.Patch(typeof(JobDriver_SexBaseInitiator).GetMethod("Start"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("JobDriver_SexBaseInitiator_Postfix")));
 
             Log("Dyspareunia initialization is complete. " + harmony.GetPatchedMethods().EnumerableCount() + " patches applied.");
         }
@@ -50,8 +42,7 @@ namespace Dyspareunia
                 Log("Pawn is NULL.");
                 return;
             }
-            Log("Kind: " + p.KindLabel);
-            Log("Name: " + p.Name);
+            Log("Pawn: " + p.Label);
             Log("Gender is " + p.gender + " and RJW sex is " + GenderHelper.GetSex(p));
             Log("Body size: " + p.BodySize);
             Hediff gen;
@@ -61,8 +52,8 @@ namespace Dyspareunia
                 if (gen == null) Log("There is a penetrating organ, but no penis.");
                 else
                 {
-                    Log("Penis: " + gen.def + " (" + gen.Severity + ") size");
-                    Log("Overall size: " + (p.BodySize * gen.Severity));
+                    Log("Penis: " + gen.def + " (" + gen.Severity + " size)");
+                    Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
                 }
             }
             if (Genital_Helper.has_vagina(p))
@@ -71,8 +62,8 @@ namespace Dyspareunia
                 if (gen is null) Log("Vagina is NULL.");
                 else
                 {
-                    Log("Vagina: " + gen.def + " (" + gen.Severity + ") size");
-                    Log("Overall size: " + (p.BodySize * gen.Severity));
+                    Log("Vagina: " + gen.def + " (" + gen.Severity + " size)");
+                    Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
                 }
             }
             if (rjw.Genital_Helper.has_anus(p))
@@ -81,8 +72,8 @@ namespace Dyspareunia
                 if (gen is null) Log("Anus not found :/");
                 else
                 {
-                    Log("Anus: " + gen.def + " (" + gen.Severity + ") size");
-                    Log("Overall size: " + (p.BodySize * gen.Severity));
+                    Log("Anus: " + gen.def + " (" + gen.Severity + " size)");
+                    Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
                 }
             }
         }
@@ -98,6 +89,7 @@ namespace Dyspareunia
 
             PenetrationUtility.ProcessPenetrations(pawn, partner, rape, sextype);
 
+            // The code below is just a test for an alternative way of getting sex types. It can safely be deleted if the current method works
             List<LogEntry> entries = Find.PlayLog.AllEntries;
             for (int i = 0; i < entries.Count; i++)
                 if ((entries[i] is PlayLogEntry_Interaction logEntry) && (logEntry.Concerns(pawn) && logEntry.Concerns(partner)))
@@ -105,25 +97,6 @@ namespace Dyspareunia
                     Log("Log entry #" + (i + 1) + "/" + entries.Count + " (" + logEntry.Age + " ticks ago): " + logEntry);
                     break;
                 }
-        }
-
-        public static void JobDriver_SexBaseInitiator_Postfix(JobDriver_SexBaseInitiator __instance)
-        {
-            Log("JobDriver_SexBaseInitiator_Postfix");
-            Log("Sex type: " + __instance.sexType);
-            if (__instance.isRape) Log("This is a rape.");
-            if (__instance.job != null)
-            {
-                Log("The asssociated Job is " + __instance.job.GetReport(__instance.pawn) + ".");
-                if (__instance.job.interaction != null)
-                    Log("The Job Interaction is " + __instance.job.interaction.label + " (" + __instance.job.interaction.defName + ").");
-                else Log("There is no Job Interaction.");
-            }
-            else Log("There is no associated Job.");
-            Log("* Initiator *");
-            LogPawnData(__instance.pawn);
-            Log("* Partner *");
-            LogPawnData(__instance.Partner);
         }
     }
 }
