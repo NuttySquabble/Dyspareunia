@@ -13,6 +13,13 @@ namespace Dyspareunia
 
         public static void AddHediff(string damageDefName, double damage, Hediff orifice, Pawn instigator)
         {
+            // If damage is too low (or negative), skipping it
+            if (damage < 0.5)
+            {
+                Dyspareunia.Log(damageDefName + " is too low to apply.");
+                return;
+            }
+
             Dyspareunia.Log(damageDefName + " damage amount: " + damage);
             DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(damageDefName);
             if (damageDef == null)
@@ -66,58 +73,15 @@ namespace Dyspareunia
                 stretchDamage *= 1.5;
             }
 
+            // Applying randomness
+            double damageFactor = Rand.Range(0.5f, 1.5f);
+            Dyspareunia.Log("damageFactor = " + damageFactor);
+            rubbingDamage *= damageFactor * Rand.Range(0.75f, 1.25f);
+            stretchDamage *= damageFactor;
+
+            // Adding resultinghediffs
             AddHediff("SexRub", rubbingDamage, orifice, penetrator);
             AddHediff("SexStretch", stretchDamage, orifice, penetrator);
-
-            // Adding rubbing damage (abrasion)
-            //Dyspareunia.Log("Rubbing damage amount: " + rubbingDamage);
-            //HediffDef hediffDef = HediffDef.Named("Abrasion");
-            //if (hediffDef == null)
-            //{
-            //    Dyspareunia.Log("No hediff def found.");
-            //    return;
-            //}
-            //Dyspareunia.Log("Hediff def: " + hediffDef);
-            //DamageDef damageDef = DefDatabase<DamageDef>.GetNamed("SexRub");
-            //if (damageDef == null)
-            //{
-            //    Dyspareunia.Log("No DamageDef 'Rub' found.");
-            //    return;
-            //}
-            //Dyspareunia.Log("Damage def: " + damageDef);
-            //DamageInfo damageInfo = new DamageInfo(damageDef, (float)rubbingDamage, instigator: penetrator, hitPart: orifice.Part);
-            //damageInfo.SetIgnoreArmor(true);
-            //Dyspareunia.Log("Abrasion damage info: " + damageInfo);
-            //Hediff hediff = HediffMaker.MakeHediff(hediffDef, target, orifice.Part);
-            //hediff.Severity = (float)rubbingDamage;
-            //target.health.AddHediff(hediff, orifice.Part, damageInfo);
-            //Dyspareunia.Log("Applied hediff: " + hediff);
-
-            //// Adding stretch damage (rupture)
-            //Dyspareunia.Log("Stretch damage amount: " + stretchDamage);
-            //if (stretchDamage > 0)
-            //{
-            //    hediffDef = HediffDef.Named("Rupture");
-            //    if (hediffDef == null)
-            //    {
-            //        Dyspareunia.Log("No hediff def found.");
-            //        return;
-            //    }
-            //    Dyspareunia.Log("Hediff def: " + hediffDef);
-            //    damageDef = DefDatabase<DamageDef>.GetNamed("SexStretch");
-            //    if (damageDef == null)
-            //    {
-            //        Dyspareunia.Log("No DamageDef 'Stretch' found.");
-            //        return;
-            //    }
-            //    Dyspareunia.Log("Damage def: " + damageDef);
-            //    damageInfo = new DamageInfo(damageDef, (float)stretchDamage, instigator: penetrator, hitPart: orifice.Part);
-            //    damageInfo.SetIgnoreArmor(true);
-            //    Dyspareunia.Log("Stretch damage info: " + damageInfo);
-            //    hediff = HediffMaker.MakeHediff(hediffDef, target, orifice.Part);
-            //    hediff.Severity = (float)stretchDamage;
-            //    target.health.AddHediff(hediff, orifice.Part, damageInfo);
-            //    Dyspareunia.Log("Applied hediff: " + hediff);
         }
 
         /// <summary>
