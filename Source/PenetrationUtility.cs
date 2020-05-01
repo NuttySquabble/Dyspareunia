@@ -44,6 +44,17 @@ namespace Dyspareunia
             Dyspareunia.Log("Applied hediff: " + hediff);
         }
 
+        public static float StretchFactor { get; set; } = 1;
+
+        public static void StretchOrgan(Hediff organ, double amount)
+        {
+            if (amount <= 0) return;
+            Dyspareunia.Log("Organ type is " + organ.GetType());
+            float stretch = (float)amount / organ.Part.def.hitPoints * StretchFactor;
+            Dyspareunia.Log("Stretching " + organ.def.defName + " (" + organ.Severity + " size) by " + stretch);
+            organ.Severity += stretch;
+        }
+
         public static void ApplyDamage(Hediff penetratingOrgan, Hediff orifice, bool isRape)
         {
             // Checking validity of penetrator and target
@@ -79,9 +90,12 @@ namespace Dyspareunia
             rubbingDamage *= damageFactor * Rand.Range(0.75f, 1.25f);
             stretchDamage *= damageFactor;
 
-            // Adding resultinghediffs
-            AddHediff("SexRub", rubbingDamage, orifice, penetrator);
-            AddHediff("SexStretch", stretchDamage, orifice, penetrator);
+            // Adding a single hediff based on which damage type is stronger (to reduce clutter in the Health view and save on the number of treatments)
+            if (rubbingDamage > stretchDamage) AddHediff("SexRub", rubbingDamage + stretchDamage, orifice, penetrator);
+            else AddHediff("SexStretch", rubbingDamage + stretchDamage, orifice, penetrator);
+
+            // Stretching the orifice
+            StretchOrgan(orifice, stretchDamage);
         }
 
         /// <summary>
