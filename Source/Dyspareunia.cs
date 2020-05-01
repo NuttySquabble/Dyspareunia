@@ -21,6 +21,8 @@ namespace Dyspareunia
             Harmony.DEBUG = true;
 
             harmony.Patch(typeof(SexUtility).GetMethod("ProcessSex"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Postfix")));
+            harmony.Patch(typeof(Hediff_PartBaseNatural).GetMethod("Tick"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("PartBase_Tick_Postfix")));
+            harmony.Patch(typeof(Hediff_PartBaseArtifical).GetMethod("Tick"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("PartBase_Tick_Postfix")));
 
             Log("Dyspareunia initialization is complete. " + harmony.GetPatchedMethods().EnumerableCount() + " patches applied.");
         }
@@ -31,9 +33,12 @@ namespace Dyspareunia
 
         public static Hediff GetVagina(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical) && hed.def.defName.ToLower().Contains("vagina"));
 
-        public static Hediff GetMouth(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == Genital_Helper.get_mouth(pawn) && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
-
         public static Hediff GetAnus(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == Genital_Helper.get_anus(pawn) && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
+
+        //public static Hediff GetMouth(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == Genital_Helper.get_mouth(pawn) && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
+
+        public static bool IsOrifice(Hediff hediff) => (hediff is Hediff_PartBaseNatural || hediff is Hediff_PartBaseArtifical) && (hediff.def.defName.ToLower().Contains("vagina") || hediff.def.defName.ToLower().Contains("anus"));
+
 
         public static void LogPawnData(Pawn p)
         {
@@ -78,6 +83,13 @@ namespace Dyspareunia
             }
         }
 
+        /// <summary>
+        /// Harmony postfix method for SexUtility.ProcessSex. It calculates and applies damage and other effects
+        /// </summary>
+        /// <param name="pawn">Pawn 1 (rapist, whore etc.)</param>
+        /// <param name="partner">Pawn 2 (victim, client etc.)</param>
+        /// <param name="rape">True if it's a non-consensual sex</param>
+        /// <param name="sextype">Sex type (only Vaginal, Anal and Double Penetration are supported ATM)</param>
         public static void SexUtility_Postfix(Pawn pawn, Pawn partner, bool rape, xxx.rjwSextype sextype)
         {
             Log("SexUtility_Postfix");
@@ -97,6 +109,35 @@ namespace Dyspareunia
                     Log("Log entry #" + (i + 1) + "/" + entries.Count + " (" + logEntry.Age + " ticks ago): " + logEntry);
                     break;
                 }
+        }
+
+        /// <summary>
+        /// Harmony postfix method for Hediff_PartBaseNatural.Tick and Hediff_PartBaseNatural.Tick. Applies organ contraction
+        /// </summary>
+        /// <param name="__instance"></param>
+        public static void PartBase_Tick_Postfix(HediffWithComps __instance)
+        {
+            // Only runs once per 14 hours 40 minutes (to contract by 50% in 30 days)
+            if (__instance.ageTicks % 36000 != 0)
+                return;
+
+            // Skip unspawned pawns
+            if (!__instance.pawn.Spawned)
+                return;
+
+            // Only works for orifices
+            if (!IsOrifice(__instance))
+                return;
+
+            // Only contracts organs more than 0.5 in size
+            float oldSize = __instance.Severity;
+            if (__instance.Severity <= 0.5)
+                return;
+
+            // Contract the part by 1%
+            __instance.Heal(0.01f);
+
+            Dyspareunia.Log(__instance.pawn.Label + "'s " + __instance.Label + " (old size " + oldSize + ") has contracted to " + __instance.Severity);
         }
     }
 }
