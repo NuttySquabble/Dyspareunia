@@ -168,6 +168,15 @@ namespace Dyspareunia
 
             // Stretching the orifice
             StretchOrgan(orifice, stretchDamage);
+
+            // Applying positive moodlets for a big dick
+            if (relativeSize > 1.25)
+            {
+                if (penetrator.needs?.mood?.thoughts?.memories != null)
+                    penetrator.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("TightLovin"));
+                if (!isRape && target.needs?.mood?.thoughts?.memories != null)
+                    target.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("BigDick"));
+            }
         }
 
         /// <summary>
@@ -188,13 +197,13 @@ namespace Dyspareunia
                 case xxx.rjwSextype.Vaginal:
                     if (Dyspareunia.HasPenetratingOrgan(p1) && Genital_Helper.has_vagina(p2))
                         ApplyDamage(Genital_Helper.get_penis_all(p1), Dyspareunia.GetVagina(p2), rape);
-                    else ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetVagina(p1), rape);
+                    else ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetVagina(p1), false);
                     break;
 
                 case xxx.rjwSextype.Anal:
                     if (Dyspareunia.HasPenetratingOrgan(p1) && Genital_Helper.has_anus(p2))
                         ApplyDamage(Genital_Helper.get_penis_all(p1), Dyspareunia.GetAnus(p2), rape);
-                    else ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetAnus(p1), rape);
+                    else ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetAnus(p1), false);
                     break;
 
                 case xxx.rjwSextype.Oral:
@@ -209,8 +218,8 @@ namespace Dyspareunia
                     }
                     else
                     {
-                        ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetVagina(p1), rape);
-                        ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetAnus(p1), rape);
+                        ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetVagina(p1), false);
+                        ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetAnus(p1), false);
                     }
                     break;
 
