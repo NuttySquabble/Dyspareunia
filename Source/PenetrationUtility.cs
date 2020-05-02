@@ -1,4 +1,5 @@
-﻿using rjw;
+﻿using RimWorld;
+using rjw;
 using System;
 using System.Collections.Generic;
 using Verse;
@@ -55,6 +56,8 @@ namespace Dyspareunia
             organ.Severity += stretch;
         }
 
+        static TraitDef wimpTraitDef = TraitDef.Named("Wimp");
+
         public static void ApplyDamage(Hediff penetratingOrgan, Hediff orifice, bool isRape)
         {
             // Checking validity of penetrator and target
@@ -74,25 +77,94 @@ namespace Dyspareunia
 
             // Calculating damage amounts
             double relativeSize = GetOrganSize(penetratingOrgan) / GetOrganSize(orifice);
-            double rubbingDamage = 1;
+            double rubbingDamage = 0.3;
             double stretchDamage = Math.Max(relativeSize - 1, 0);
 
-            if (relativeSize < 1.2) rubbingDamage *= 0.5; // If penetrating organ is smaller than the orifice, rubbing damage is lower
+            if (relativeSize > 1.25) rubbingDamage *= 1.5; // If penetrating organ is much bigger than the orifice, rubbing damage is higher
+            
             if (isRape) // Rape is rough
             {
-                rubbingDamage *= 2;
+                rubbingDamage *= 1.5;
                 stretchDamage *= 1.5;
             }
 
+            if (penetrator.story?.traits != null)
+            {
+                if (penetrator.story.traits.HasTrait(TraitDefOf.Bloodlust))
+                {
+                    rubbingDamage *= 1.25;
+                    stretchDamage *= 1.125;
+                }
+
+                if (penetrator.story.traits.HasTrait(xxx.rapist))
+                {
+                    rubbingDamage *= 1.25;
+                    stretchDamage *= 1.125;
+                }
+
+                if (penetrator.story.traits.HasTrait(TraitDefOf.Psychopath))
+                {
+                    rubbingDamage *= 1.2;
+                    stretchDamage *= 1.1;
+                }
+
+                if ((penetrator.story.traits.HasTrait(TraitDefOf.DislikesMen) && target.gender == Gender.Male) || (penetrator.story.traits.HasTrait(TraitDefOf.DislikesWomen) && target.gender == Gender.Female))
+                {
+                    rubbingDamage *= 1.1;
+                    stretchDamage *= 1.05;
+                }
+
+                if (penetrator.story.traits.HasTrait(TraitDefOf.Kind))
+                {
+                    rubbingDamage *= 0.8;
+                    stretchDamage *= 0.9;
+                }
+
+                if (penetrator.story.traits.HasTrait(wimpTraitDef))
+                {
+                    rubbingDamage *= 0.8;
+                    stretchDamage *= 0.9;
+                }
+            }
+
+            if (target.story?.traits != null)
+            {
+                if (target.story.traits.HasTrait(wimpTraitDef))
+                {
+                    rubbingDamage *= 1.1;
+                    stretchDamage *= 1.1;
+                }
+
+                if (target.story.traits.HasTrait(xxx.masochist))
+                {
+                    rubbingDamage *= 1.1;
+                    stretchDamage *= 1.05;
+                }
+
+                if (target.story.traits.HasTrait(xxx.masochist))
+                {
+                    rubbingDamage *= 1.1;
+                    stretchDamage *= 1.05;
+                }
+
+                if (target.story.traits.HasTrait(TraitDefOf.Tough))
+                {
+                    rubbingDamage *= 0.9;
+                    stretchDamage *= 0.9;
+                }
+            }
+
+            Dyspareunia.Log("Rubbing damage before randomization: " + rubbingDamage);
+            Dyspareunia.Log("Stretch damage before randomization: " + stretchDamage);
+
             // Applying randomness
-            double damageFactor = Rand.Range(0.5f, 1.5f);
+            float damageFactor = Rand.Range(0.5f, 1.5f);
             Dyspareunia.Log("damageFactor = " + damageFactor);
             rubbingDamage *= damageFactor * Rand.Range(0.75f, 1.25f);
             stretchDamage *= damageFactor;
 
             // Adding a single hediff based on which damage type is stronger (to reduce clutter in the Health view and save on the number of treatments)
-            if (rubbingDamage > stretchDamage) AddHediff("SexRub", rubbingDamage + stretchDamage, orifice, penetrator);
-            else AddHediff("SexStretch", rubbingDamage + stretchDamage, orifice, penetrator);
+            AddHediff(rubbingDamage > stretchDamage ? "SexRub" : "SexStretch", rubbingDamage + stretchDamage, orifice, penetrator);
 
             // Stretching the orifice
             StretchOrgan(orifice, stretchDamage);
