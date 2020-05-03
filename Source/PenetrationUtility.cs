@@ -16,10 +16,7 @@ namespace Dyspareunia
         {
             // If damage is too low (or negative), skipping it
             if (damage < 0.5)
-            {
-                Dyspareunia.Log(damageDefName + " is too low to apply.");
                 return;
-            }
 
             Dyspareunia.Log(damageDefName + " damage amount: " + damage);
             DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(damageDefName);
@@ -28,21 +25,20 @@ namespace Dyspareunia
                 Dyspareunia.Log("No DamageDef '" + damageDefName + "' found.");
                 return;
             }
-            Dyspareunia.Log("Damage def: " + damageDef);
             DamageInfo damageInfo = new DamageInfo(damageDef, (float)damage, instigator: instigator, hitPart: orifice.Part);
             damageInfo.SetIgnoreArmor(true);
-            Dyspareunia.Log("Abrasion damage info: " + damageInfo);
             HediffDef hediffDef = damageDef.hediff;
             if (hediffDef == null)
             {
-                Dyspareunia.Log("No hediff def found.");
+                Dyspareunia.Log("No HediffDef for '" + damageDef.label + "' found.");
                 return;
             }
-            Dyspareunia.Log("Hediff def: " + hediffDef);
             Hediff hediff = HediffMaker.MakeHediff(hediffDef, orifice.pawn, orifice.Part);
             hediff.Severity = (float)damage;
             orifice.pawn.health.AddHediff(hediff, orifice.Part, damageInfo);
+#if DEBUG
             Dyspareunia.Log("Applied hediff: " + hediff);
+#endif
         }
 
         public static float StretchFactor { get; set; } = 1;
@@ -50,13 +46,14 @@ namespace Dyspareunia
         public static void StretchOrgan(Hediff organ, double amount)
         {
             if (amount <= 0) return;
-            Dyspareunia.Log("Organ type is " + organ.GetType());
             float stretch = (float)amount / organ.Part.def.hitPoints * StretchFactor;
+#if DEBUG
             Dyspareunia.Log("Stretching " + organ.def.defName + " (" + organ.Severity + " size) by " + stretch);
+#endif
             organ.Severity += stretch;
         }
 
-        static TraitDef wimpTraitDef = TraitDef.Named("Wimp");
+        static readonly TraitDef wimpTraitDef = TraitDef.Named("Wimp");
 
         public static void ApplyDamage(Hediff penetratingOrgan, Hediff orifice, bool isRape)
         {
@@ -154,14 +151,14 @@ namespace Dyspareunia
                 }
             }
 
+#if DEBUG
             Dyspareunia.Log("Rubbing damage before randomization: " + rubbingDamage);
             Dyspareunia.Log("Stretch damage before randomization: " + stretchDamage);
+#endif
 
             // Applying randomness
-            float damageFactor = Rand.Range(0.5f, 1.5f);
-            Dyspareunia.Log("damageFactor = " + damageFactor);
-            rubbingDamage *= damageFactor * Rand.Range(0.75f, 1.25f);
-            stretchDamage *= damageFactor;
+            rubbingDamage *= Rand.Range(0.75f, 1.25f);
+            stretchDamage *= Rand.Range(0.75f, 1.25f);
 
             // Adding a single hediff based on which damage type is stronger (to reduce clutter in the Health view and save on the number of treatments)
             AddHediff(rubbingDamage > stretchDamage ? "SexRub" : "SexStretch", rubbingDamage + stretchDamage, orifice, penetrator);
@@ -189,7 +186,9 @@ namespace Dyspareunia
         /// <returns>Empty list if no eligible penetrations found, or an element for each penetration (can be DP etc.)</returns>
         public static void ProcessPenetrations(Pawn p1, Pawn p2, bool rape, xxx.rjwSextype sextype)
         {
+#if DEBUG
             Dyspareunia.Log("Checking " + sextype + (rape ? " rape" : " sex") + " between " + p1.Label + " and " + p2.Label + ".");
+#endif
 
             // Setting up PenetrationUtility value(s) based on sex type
             switch (sextype)
