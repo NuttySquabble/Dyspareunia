@@ -55,10 +55,9 @@ namespace Dyspareunia
 
         static readonly TraitDef wimpTraitDef = TraitDef.Named("Wimp");
 
-        public static void ApplyDamage(Hediff penetratingOrgan, Hediff orifice, bool isRape)
+        public static void ApplyDamage(Pawn penetrator, double penetratingOrganSize, Hediff orifice, bool isRape)
         {
             // Checking validity of penetrator and target
-            Pawn penetrator = penetratingOrgan?.pawn;
             if (penetrator is null)
             {
                 Dyspareunia.Log("Penetrator not found!");
@@ -70,10 +69,10 @@ namespace Dyspareunia
                 Dyspareunia.Log("Orifice/target not found!");
                 return;
             }
-            Dyspareunia.Log("Applying damage from " + penetrator.Label + "'s " + penetratingOrgan.def.defName + " (effective size " + GetOrganSize(penetratingOrgan) + ") penetrating " + target.Label + "'s " + orifice.def.defName + " (effective size " + GetOrganSize(orifice) + ").");
+            Dyspareunia.Log("Applying damage from " + penetrator.Label + " (effective size " + penetratingOrganSize + ") penetrating " + target.Label + "'s " + orifice.def.defName + " (effective size " + GetOrganSize(orifice) + ").");
 
             // Calculating damage amounts
-            double relativeSize = GetOrganSize(penetratingOrgan) / GetOrganSize(orifice);
+            double relativeSize = penetratingOrganSize / GetOrganSize(orifice);
             double rubbingDamage = 0.3;
             double stretchDamage = Math.Max(relativeSize - 1, 0);
 
@@ -176,6 +175,58 @@ namespace Dyspareunia
             }
         }
 
+        public static void ApplyDamage(Hediff penetratingOrgan, Hediff orifice, bool isRape) 
+            => ApplyDamage(penetratingOrgan.pawn, GetOrganSize(penetratingOrgan), orifice, isRape);
+
+        /// <summary>
+        /// Returns the size (calculated as coverage * body size * 10) of the pawn's biggest finger
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <returns></returns>
+        public static double GetFingerSize(Pawn pawn)
+        {
+            if (pawn?.RaceProps?.body is null)
+            {
+                Dyspareunia.Log("The pawn has no body!");
+                return 0;
+            }
+
+            double biggest = 0;
+            foreach (BodyPartRecord bpr in pawn.RaceProps.body.AllParts)
+                if (bpr.def.defName == "Finger")
+                {
+                    Dyspareunia.Log("Finger '" + bpr.Label + "' of size " + bpr.coverage + " found.");
+                    if (!pawn.health.hediffSet.PartIsMissing(bpr)) biggest = Math.Max(bpr.coverage, biggest);
+                    else Dyspareunia.Log("But it is missing :(");
+                }
+            return biggest * pawn.BodySize * 10;
+        }
+
+        /// <summary>
+        /// Returns the size (calculated as coverage * body size * 10) of the pawn's hand
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <returns></returns>
+        public static double GetHandSize(Pawn pawn)
+        {
+            if (pawn?.RaceProps?.body is null)
+            {
+                Dyspareunia.Log("The pawn has no body!");
+                return 0;
+            }
+            if (pawn?.health?.hediffSet is null)
+            {
+                Dyspareunia.Log("The pawn has no hediffSet.");
+                return 0;
+            }
+
+            List<BodyPartRecord> parts = (List<BodyPartRecord>)pawn?.RaceProps.body.GetPartsWithDef(BodyPartDefOf.Hand);
+#if DEBUG
+            Dyspareunia.Log(pawn.Label + " has " + parts.Count + " hands.");
+#endif
+            return parts.NullOrEmpty<BodyPartRecord>() ? 0 : 10 * parts[0].coverage * pawn.BodySize;
+        }
+
         /// <summary>
         /// This method discovers all penetrations in the sex act and applies respective damage
         /// </summary>
@@ -222,8 +273,16 @@ namespace Dyspareunia
                     }
                     break;
 
-                case xxx.rjwSextype.Fingering: break; // Assume no penetration
-                case xxx.rjwSextype.Fisting: break; // TODO: implement fisting
+                case xxx.rjwSextype.Fingering:
+                    if (Genital_Helper.has_vagina(p2) || Genital_Helper.has_anus(p2))
+                        ApplyDamage(p1, GetFingerSize(p1), Dyspareunia.GetVagina(p2) ?? Dyspareunia.GetAnus(p2), rape);
+                    else ApplyDamage(p2, GetFingerSize(p2), Dyspareunia.GetVagina(p1) ?? Dyspareunia.GetAnus(p1), false);
+                    break;
+                case xxx.rjwSextype.Fisting:
+                    if (Genital_Helper.has_vagina(p2) || Genital_Helper.has_anus(p2))
+                        ApplyDamage(p1, GetHandSize(p1), Dyspareunia.GetVagina(p2) ?? Dyspareunia.GetAnus(p2), rape);
+                    else ApplyDamage(p2, GetHandSize(p2), Dyspareunia.GetVagina(p1) ?? Dyspareunia.GetAnus(p1), false);
+                    break;
                 case xxx.rjwSextype.MechImplant: break;  // TODO: implemenet mech implantation
             }
         }
