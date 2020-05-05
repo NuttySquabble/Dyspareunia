@@ -195,10 +195,11 @@ namespace Dyspareunia
             foreach (BodyPartRecord bpr in pawn.RaceProps.body.AllParts)
                 if (bpr.def.defName == "Finger")
                 {
-                    Dyspareunia.Log("Finger '" + bpr.Label + "' of size " + bpr.coverage + " found.");
+                    Dyspareunia.Log("Finger '" + bpr.Label + "' of coverage " + bpr.coverage + " found.");
                     if (!pawn.health.hediffSet.PartIsMissing(bpr)) biggest = Math.Max(bpr.coverage, biggest);
                     else Dyspareunia.Log("But it is missing :(");
                 }
+            Dyspareunia.Log("Finger size: " + (biggest * pawn.BodySize * 10));
             return biggest * pawn.BodySize * 10;
         }
 
@@ -220,11 +221,16 @@ namespace Dyspareunia
                 return 0;
             }
 
-            List<BodyPartRecord> parts = (List<BodyPartRecord>)pawn?.RaceProps.body.GetPartsWithDef(BodyPartDefOf.Hand);
-#if DEBUG
+            List<BodyPartRecord> parts = (List<BodyPartRecord>)pawn.RaceProps.body.GetPartsWithDef(BodyPartDefOf.Hand);
+            if (parts is null)
+            {
+                Dyspareunia.Log(pawn + " has no hands!");
+                return 0;
+            }
             Dyspareunia.Log(pawn.Label + " has " + parts.Count + " hands.");
-#endif
-            return parts.NullOrEmpty<BodyPartRecord>() ? 0 : 10 * parts[0].coverage * pawn.BodySize;
+            double size = parts.NullOrEmpty<BodyPartRecord>() ? 0 : parts[0].coverage * pawn.BodySize * 10;
+            Dyspareunia.Log("Hand size: " + size);
+            return size;
         }
 
         /// <summary>
@@ -241,7 +247,6 @@ namespace Dyspareunia
             Dyspareunia.Log("Checking " + sextype + (rape ? " rape" : " sex") + " between " + p1.Label + " and " + p2.Label + ".");
 #endif
 
-            // Setting up PenetrationUtility value(s) based on sex type
             switch (sextype)
             {
                 case xxx.rjwSextype.Vaginal:
@@ -278,12 +283,19 @@ namespace Dyspareunia
                         ApplyDamage(p1, GetFingerSize(p1), Dyspareunia.GetVagina(p2) ?? Dyspareunia.GetAnus(p2), rape);
                     else ApplyDamage(p2, GetFingerSize(p2), Dyspareunia.GetVagina(p1) ?? Dyspareunia.GetAnus(p1), false);
                     break;
+
                 case xxx.rjwSextype.Fisting:
                     if (Genital_Helper.has_vagina(p2) || Genital_Helper.has_anus(p2))
                         ApplyDamage(p1, GetHandSize(p1), Dyspareunia.GetVagina(p2) ?? Dyspareunia.GetAnus(p2), rape);
                     else ApplyDamage(p2, GetHandSize(p2), Dyspareunia.GetVagina(p1) ?? Dyspareunia.GetAnus(p1), false);
                     break;
-                case xxx.rjwSextype.MechImplant: break;  // TODO: implemenet mech implantation
+
+                case xxx.rjwSextype.MechImplant:
+                    Dyspareunia.Log("Processing mech implant sex between " + p1.Label + " and " + p2.Label);
+                    if (p1.kindDef.race.defName.ContainsAny("Mech_Centipede", "Mech_Lancer", "Mech_Scyther", "Mech_Crawler", "Mech_Skullywag", "Mech_Flamebot", "Mech_Mammoth", "Mech_Assaulter"))
+                        ApplyDamage(p1, p1.BodySize, Dyspareunia.GetVagina(p2) ?? Dyspareunia.GetAnus(p2), rape);
+                    else ApplyDamage(p2, p2.BodySize, Dyspareunia.GetVagina(p1) ?? Dyspareunia.GetAnus(p1), false);
+                    break;
             }
         }
     }
