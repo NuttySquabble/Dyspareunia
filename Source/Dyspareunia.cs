@@ -18,7 +18,6 @@ namespace Dyspareunia
         {
             Log("Dyspareunia is starting.");
             harmony = new Harmony("nuttysquabble.dyspareunia");
-            Harmony.DEBUG = true;
 
             harmony.Patch(typeof(SexUtility).GetMethod("ProcessSex"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Postfix")));
             harmony.Patch(typeof(Hediff_PartBaseNatural).GetMethod("Tick"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("PartBase_Tick_Postfix")));
