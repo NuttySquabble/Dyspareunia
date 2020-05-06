@@ -19,7 +19,7 @@ namespace Dyspareunia
             Log("Dyspareunia is starting.");
             harmony = new Harmony("nuttysquabble.dyspareunia");
 
-            harmony.Patch(typeof(SexUtility).GetMethod("ProcessSex"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Postfix")));
+            harmony.Patch(typeof(SexUtility).GetMethod("Aftersex", new Type[] { typeof(Pawn), typeof(Pawn), typeof(bool), typeof(bool), typeof(bool), typeof(xxx.rjwSextype) }), prefix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Prefix")));
             harmony.Patch(typeof(Hediff_PartBaseNatural).GetMethod("Tick"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("PartBase_Tick_Postfix")));
             harmony.Patch(typeof(Hediff_PartBaseArtifical).GetMethod("Tick"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("PartBase_Tick_Postfix")));
 
@@ -37,7 +37,6 @@ namespace Dyspareunia
         //public static Hediff GetMouth(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == Genital_Helper.get_mouth(pawn) && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
 
         public static bool IsOrifice(Hediff hediff) => (hediff is Hediff_PartBaseNatural || hediff is Hediff_PartBaseArtifical) && (hediff.def.defName.ToLower().Contains("vagina") || hediff.def.defName.ToLower().Contains("anus"));
-
 
         public static void LogPawnData(Pawn p)
         {
@@ -89,10 +88,10 @@ namespace Dyspareunia
         /// <param name="partner">Pawn 2 (victim, client etc.)</param>
         /// <param name="rape">True if it's a non-consensual sex</param>
         /// <param name="sextype">Sex type (only Vaginal, Anal and Double Penetration are supported ATM)</param>
-        public static void SexUtility_Postfix(Pawn pawn, Pawn partner, bool rape, xxx.rjwSextype sextype)
+        public static void SexUtility_Prefix(Pawn pawn, Pawn partner, bool rape, xxx.rjwSextype sextype)
         {
 #if DEBUG
-            Log("SexUtility_Postfix");
+            Log("SexUtility_Prefix");
             Log("Sex type: " + sextype);
             Log("* Initiator *");
             LogPawnData(pawn);
