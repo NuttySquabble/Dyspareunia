@@ -41,6 +41,29 @@ namespace Dyspareunia
 #endif
         }
 
+        public static double GetWetness(Hediff organ)
+        {
+            double amount = 0;
+
+            // Getting wetness
+            CompHediffBodyPart hediffComp = organ.TryGetComp<CompHediffBodyPart>();
+            if (hediffComp != null && hediffComp.FluidAmmount > 0)
+            {
+                Dyspareunia.Log("Fluid: " + hediffComp.FluidType + ". Amount: " + hediffComp.FluidAmmount + ". Modifier: " + hediffComp.FluidModifier);
+                amount = hediffComp.FluidAmmount * hediffComp.FluidModifier / organ.pawn.BodySize;
+            }
+
+            // Adding semen to the amount of fluids
+            foreach (Hediff_Semen hediff in organ.pawn.health.hediffSet.GetHediffs<Hediff_Semen>())
+                if (hediff.Part == organ.Part)
+                {
+                    Dyspareunia.Log("Found " + hediff.Severity + " semen in " + hediff.Part.Label);
+                    amount += hediff.Severity;
+                }
+
+            return amount / organ.pawn.BodySize * 0.1;
+        }
+
         public static float StretchFactor { get; set; } = 1;
 
         public static void StretchOrgan(Hediff organ, double amount)
@@ -73,7 +96,7 @@ namespace Dyspareunia
 
             // Calculating damage amounts
             double relativeSize = penetratingOrganSize / GetOrganSize(orifice);
-            double rubbingDamage = 0.3;
+            double rubbingDamage = 0.5;
             double stretchDamage = Math.Max(relativeSize - 1, 0);
 
             if (relativeSize > 1.25) rubbingDamage *= 1.5; // If penetrating organ is much bigger than the orifice, rubbing damage is higher
@@ -159,11 +182,27 @@ namespace Dyspareunia
             rubbingDamage *= Rand.Range(0.75f, 1.25f);
             stretchDamage *= Rand.Range(0.75f, 1.25f);
 
-            // Adding a single hediff based on which damage type is stronger (to reduce clutter in the Health view and save on the number of treatments)
-            AddHediff(rubbingDamage > stretchDamage ? "SexRub" : "SexStretch", rubbingDamage + stretchDamage, orifice, penetrator);
+#if DEBUG
+            Dyspareunia.Log("Rubbing damage before lubricant: " + rubbingDamage);
+            Dyspareunia.Log("Stretch damage before lubricant: " + stretchDamage);
+#endif
 
             // Stretching the orifice
             StretchOrgan(orifice, stretchDamage);
+
+            // Applying lubrication
+            double wetness = GetWetness(orifice);
+            Dyspareunia.Log("Total wetness: " + wetness);
+            rubbingDamage *= Math.Max(1 - wetness * 0.5, 0.25);
+            stretchDamage *= Math.Max(1 - wetness * 0.4, 0.3);
+
+#if DEBUG
+            Dyspareunia.Log("Rubbing damage before final: " + rubbingDamage);
+            Dyspareunia.Log("Stretch damage before final: " + stretchDamage);
+#endif
+
+            // Adding a single hediff based on which damage type is stronger (to reduce clutter in the Health view and save on the number of treatments)
+            AddHediff(rubbingDamage > stretchDamage ? "SexRub" : "SexStretch", rubbingDamage + stretchDamage, orifice, penetrator);
 
             // Applying positive moodlets for a big dick
             if (relativeSize > 1.25)
