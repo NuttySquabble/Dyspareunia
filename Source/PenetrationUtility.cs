@@ -36,9 +36,6 @@ namespace Dyspareunia
             Hediff hediff = HediffMaker.MakeHediff(hediffDef, orifice.pawn, orifice.Part);
             hediff.Severity = (float)damage;
             orifice.pawn.health.AddHediff(hediff, orifice.Part, damageInfo);
-#if DEBUG
-            Dyspareunia.Log("Applied hediff: " + hediff);
-#endif
         }
 
         public static double GetWetness(Hediff organ)
@@ -70,9 +67,7 @@ namespace Dyspareunia
         {
             if (amount <= 0) return;
             float stretch = (float)amount / organ.Part.def.hitPoints * StretchFactor;
-#if DEBUG
             Dyspareunia.Log("Stretching " + organ.def.defName + " (" + organ.Severity + " size) by " + stretch);
-#endif
             organ.Severity += stretch;
         }
 
@@ -173,19 +168,15 @@ namespace Dyspareunia
                 }
             }
 
-#if DEBUG
             Dyspareunia.Log("Rubbing damage before randomization: " + rubbingDamage);
             Dyspareunia.Log("Stretch damage before randomization: " + stretchDamage);
-#endif
 
             // Applying randomness
             rubbingDamage *= Rand.Range(0.75f, 1.25f);
             stretchDamage *= Rand.Range(0.75f, 1.25f);
 
-#if DEBUG
             Dyspareunia.Log("Rubbing damage before lubricant: " + rubbingDamage);
             Dyspareunia.Log("Stretch damage before lubricant: " + stretchDamage);
-#endif
 
             // Stretching the orifice
             StretchOrgan(orifice, stretchDamage);
@@ -196,10 +187,8 @@ namespace Dyspareunia
             rubbingDamage *= Math.Max(1 - wetness * 0.5, 0.25);
             stretchDamage *= Math.Max(1 - wetness * 0.4, 0.3);
 
-#if DEBUG
-            Dyspareunia.Log("Rubbing damage before final: " + rubbingDamage);
-            Dyspareunia.Log("Stretch damage before final: " + stretchDamage);
-#endif
+            Dyspareunia.Log("Rubbing damage final: " + rubbingDamage);
+            Dyspareunia.Log("Stretch damage final: " + stretchDamage);
 
             // Adding a single hediff based on which damage type is stronger (to reduce clutter in the Health view and save on the number of treatments)
             AddHediff(rubbingDamage > stretchDamage ? "SexRub" : "SexStretch", rubbingDamage + stretchDamage, orifice, penetrator);
@@ -282,9 +271,7 @@ namespace Dyspareunia
         /// <returns>Empty list if no eligible penetrations found, or an element for each penetration (can be DP etc.)</returns>
         public static void ProcessPenetrations(Pawn p1, Pawn p2, bool rape, xxx.rjwSextype sextype)
         {
-#if DEBUG
             Dyspareunia.Log("Checking " + sextype + (rape ? " rape" : " sex") + " between " + p1.Label + " and " + p2.Label + ".");
-#endif
 
             switch (sextype)
             {
