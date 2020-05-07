@@ -46,39 +46,39 @@ namespace Dyspareunia
                 return;
             }
             Log("Pawn: " + p.Label);
-            Log("Gender is " + p.gender + " and RJW sex is " + GenderHelper.GetSex(p));
+            //Log("Gender is " + p.gender + " and RJW sex is " + GenderHelper.GetSex(p));
             Log("Body size: " + p.BodySize);
-            Hediff gen;
-            if (HasPenetratingOrgan(p))
-            {
-                gen = Genital_Helper.get_penis_all(p);
-                if (gen == null) Log("There is a penetrating organ, but no penis.");
-                else
-                {
-                    Log("Penis: " + gen.def + " (" + gen.Severity + " size)");
-                    Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
-                }
-            }
-            if (Genital_Helper.has_vagina(p))
-            {
-                gen = GetVagina(p);
-                if (gen is null) Log("Vagina is NULL.");
-                else
-                {
-                    Log("Vagina: " + gen.def + " (" + gen.Severity + " size)");
-                    Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
-                }
-            }
-            if (rjw.Genital_Helper.has_anus(p))
-            {
-                gen = GetAnus(p);
-                if (gen is null) Log("Anus not found :/");
-                else
-                {
-                    Log("Anus: " + gen.def + " (" + gen.Severity + " size)");
-                    Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
-                }
-            }
+            //Hediff gen;
+            //if (HasPenetratingOrgan(p))
+            //{
+            //    gen = Genital_Helper.get_penis_all(p);
+            //    if (gen == null) Log("There is a penetrating organ, but no penis.");
+            //    else
+            //    {
+            //        Log("Penis: " + gen.def + " (" + gen.Severity + " size)");
+            //        Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
+            //    }
+            //}
+            //if (Genital_Helper.has_vagina(p))
+            //{
+            //    gen = GetVagina(p);
+            //    if (gen is null) Log("Vagina is NULL.");
+            //    else
+            //    {
+            //        Log("Vagina: " + gen.def + " (" + gen.Severity + " size)");
+            //        Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
+            //    }
+            //}
+            //if (rjw.Genital_Helper.has_anus(p))
+            //{
+            //    gen = GetAnus(p);
+            //    if (gen is null) Log("Anus not found :/");
+            //    else
+            //    {
+            //        Log("Anus: " + gen.def + " (" + gen.Severity + " size)");
+            //        Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
+            //    }
+            //}
         }
 
         /// <summary>
@@ -90,27 +90,14 @@ namespace Dyspareunia
         /// <param name="sextype">Sex type (only Vaginal, Anal and Double Penetration are supported ATM)</param>
         public static void SexUtility_Prefix(Pawn pawn, Pawn partner, bool rape, xxx.rjwSextype sextype)
         {
-#if DEBUG
-            Log("SexUtility_Prefix");
-            Log("Sex type: " + sextype);
+            //Log("SexUtility_Prefix");
+            //Log("Sex type: " + sextype);
             Log("* Initiator *");
             LogPawnData(pawn);
             Log("* Partner *");
             LogPawnData(partner);
-#endif
 
             PenetrationUtility.ProcessPenetrations(pawn, partner, rape, sextype);
-
-#if DEBUG
-            // The code below is just a test for an alternative way of getting sex types. It can safely be deleted if the current method works
-            List<LogEntry> entries = Find.PlayLog.AllEntries;
-            for (int i = 0; i < entries.Count; i++)
-                if ((entries[i] is PlayLogEntry_Interaction logEntry) && (logEntry.Concerns(pawn) && logEntry.Concerns(partner)))
-                {
-                    Log("Log entry #" + (i + 1) + "/" + entries.Count + " (" + logEntry.Age + " ticks ago): " + logEntry);
-                    break;
-                }
-#endif
         }
 
         /// <summary>
@@ -138,9 +125,6 @@ namespace Dyspareunia
 
             // Contract the part by 1%
             __instance.Heal(0.01f);
-#if DEBUG
-            Dyspareunia.Log(__instance.pawn.Label + "'s " + __instance.Label + " (old size " + oldSize + ") has contracted to " + __instance.Severity);
-#endif
         }
     }
 }
