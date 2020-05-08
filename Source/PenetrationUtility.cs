@@ -185,7 +185,7 @@ namespace Dyspareunia
             double wetness = GetWetness(orifice);
             Dyspareunia.Log("Total wetness: " + wetness);
             rubbingDamage *= Math.Max(1 - wetness * 0.5, 0.25);
-            stretchDamage *= Math.Max(1 - wetness * 0.4, 0.3);
+            stretchDamage *= Math.Max(1 - wetness * 0.5, 0.4);
 
             Dyspareunia.Log("Rubbing damage final: " + rubbingDamage);
             Dyspareunia.Log("Stretch damage final: " + stretchDamage);
@@ -197,9 +197,9 @@ namespace Dyspareunia
             if (relativeSize > 1.25)
             {
                 if (penetrator.needs?.mood?.thoughts?.memories != null)
-                    penetrator.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("TightLovin"));
+                    penetrator.needs.mood.thoughts.memories.TryGainMemory(ThoughtMaker.MakeThought(ThoughtDef.Named("TightLovin"), relativeSize < 2 ? 0 : 1));
                 if (!isRape && target.needs?.mood?.thoughts?.memories != null)
-                    target.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("BigDick"));
+                    target.needs.mood.thoughts.memories.TryGainMemory(ThoughtMaker.MakeThought(ThoughtDef.Named("BigDick"), relativeSize < 2 ? 0 : 1));
             }
         }
 

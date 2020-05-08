@@ -10,8 +10,13 @@
 		<stages>
 			<li>
 				<label>it was big</label>
+				<description>This thing felt pleasantly big.</description>
+				<baseMoodEffect>2</baseMoodEffect>
+			</li>
+			<li>
+				<label>it was huge</label>
 				<description>This feeling of fullness is hard to forget.</description>
-				<baseMoodEffect>3</baseMoodEffect>
+				<baseMoodEffect>4</baseMoodEffect>
 			</li>
 		</stages>
 	</ThoughtDef>
@@ -24,9 +29,14 @@
 		<stackedEffectMultiplier>0.4</stackedEffectMultiplier>
 		<stages>
 			<li>
-				<label>tight penetration</label>
+				<label>tight lovin'</label>
 				<description>So nice to put my jonny in a tight place.</description>
-				<baseMoodEffect>3</baseMoodEffect>
+				<baseMoodEffect>2</baseMoodEffect>
+			</li>
+			<li>
+				<label>super tight lovin'</label>
+				<description>That penetration was incredibly tight.</description>
+				<baseMoodEffect>4</baseMoodEffect>
 			</li>
 		</stages>
 	</ThoughtDef>
