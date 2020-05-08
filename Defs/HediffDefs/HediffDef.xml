@@ -4,6 +4,35 @@
 	<HediffDef Name="SexInjuryBase" ParentName="InjuryBase" Abstract="True">
 		<initialSeverity>0.1</initialSeverity>
 		<displayWound>false</displayWound>
+		<stages>
+			<li>
+				<becomeVisible>false</becomeVisible>
+			</li>
+			<li>
+				<minSeverity>1</minSeverity>
+				<capMods>
+					<li>
+						<capacity>Moving</capacity>
+						<offset>-0.1</offset>
+					</li>
+				</capMods>
+				<statOffsets>
+					<SexFrequency>-0.2</SexFrequency>
+				</statOffsets>
+			</li>
+			<li>
+				<minSeverity>2.5</minSeverity>
+				<capMods>
+					<li>
+						<capacity>Moving</capacity>
+						<offset>-0.2</offset>
+					</li>
+				</capMods>
+				<statOffsets>
+					<SexFrequency>-0.5</SexFrequency>
+				</statOffsets>
+			</li>
+		</stages>
 	</HediffDef>
 
 	<HediffDef ParentName="SexInjuryBase">
@@ -27,6 +56,7 @@
 		<injuryProps>
 			<painPerSeverity>0.02</painPerSeverity>
 			<averagePainPerSeverityPermanent>0.01</averagePainPerSeverityPermanent>
+			<canMerge>true</canMerge>
 			<destroyedLabel>Torn off</destroyedLabel>
 			<destroyedOutLabel>Torn out</destroyedOutLabel>
 		</injuryProps>
