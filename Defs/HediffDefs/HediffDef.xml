@@ -6,9 +6,6 @@
 		<displayWound>false</displayWound>
 		<stages>
 			<li>
-				<becomeVisible>false</becomeVisible>
-			</li>
-			<li>
 				<minSeverity>1</minSeverity>
 				<capMods>
 					<li>
