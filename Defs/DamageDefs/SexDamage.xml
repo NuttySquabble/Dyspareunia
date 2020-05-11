@@ -9,7 +9,7 @@
 		<canInterruptJobs>false</canInterruptJobs>
 		<deathMessage>{0} has been fucked to death.</deathMessage>
 		<harmAllLayersUntilOutside>false</harmAllLayersUntilOutside>
-		<scratchSplitPercentage>0.67</scratchSplitPercentage>
+		<overkillPctToDestroyPart>0.5~1</overkillPctToDestroyPart>
 	</DamageDef>
 
 	<DamageDef Name="SexRub" Parent="SexDamageBase">
@@ -17,8 +17,6 @@
 		<label>rub</label>
 		<!--workerClass>DamageWorker_Scratch</workerClass-->
 		<hediff>Abrasion</hediff>
-		<overkillPctToDestroyPart>0~1</overkillPctToDestroyPart>
-		<scratchSplitPercentage>0.67</scratchSplitPercentage>
 	</DamageDef>
 
 	<DamageDef Name="SexStretch" Parent="SexDamageBase">
@@ -27,7 +25,5 @@
 		<!--workerClass>DamageWorker_Scratch</workerClass-->
 		<hediff>Rupture</hediff>
 		<impactSoundType>Slice</impactSoundType>
-		<overkillPctToDestroyPart>0~0.7</overkillPctToDestroyPart>
-		<scratchSplitPercentage>0.67</scratchSplitPercentage>
 	</DamageDef>
 </Defs>
