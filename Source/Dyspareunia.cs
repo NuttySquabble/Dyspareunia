@@ -22,6 +22,7 @@ namespace Dyspareunia
             harmony.Patch(typeof(SexUtility).GetMethod("Aftersex", new Type[] { typeof(Pawn), typeof(Pawn), typeof(bool), typeof(bool), typeof(bool), typeof(xxx.rjwSextype) }), prefix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Prefix")));
             harmony.Patch(typeof(Hediff_PartBaseNatural).GetMethod("Tick"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("PartBase_Tick_Postfix")));
             harmony.Patch(typeof(Hediff_PartBaseArtifical).GetMethod("Tick"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("PartBase_Tick_Postfix")));
+            harmony.Patch(typeof(Hediff_BasePregnancy).GetMethod("PostBirth"), postfix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("Hediff_BasePregnancy_Patch")));
 
             Log("Dyspareunia initialization is complete. " + harmony.GetPatchedMethods().EnumerableCount() + " patches applied.");
         }
@@ -34,8 +35,6 @@ namespace Dyspareunia
 
         public static Hediff GetAnus(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == Genital_Helper.get_anus(pawn) && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
 
-        //public static Hediff GetMouth(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == Genital_Helper.get_mouth(pawn) && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
-
         public static bool IsOrifice(Hediff hediff) => (hediff is Hediff_PartBaseNatural || hediff is Hediff_PartBaseArtifical) && (hediff.def.defName.ToLower().Contains("vagina") || hediff.def.defName.ToLower().Contains("anus"));
 
         public static void LogPawnData(Pawn p)
@@ -46,39 +45,7 @@ namespace Dyspareunia
                 return;
             }
             Log("Pawn: " + p.Label);
-            //Log("Gender is " + p.gender + " and RJW sex is " + GenderHelper.GetSex(p));
             Log("Body size: " + p.BodySize);
-            //Hediff gen;
-            //if (HasPenetratingOrgan(p))
-            //{
-            //    gen = Genital_Helper.get_penis_all(p);
-            //    if (gen == null) Log("There is a penetrating organ, but no penis.");
-            //    else
-            //    {
-            //        Log("Penis: " + gen.def + " (" + gen.Severity + " size)");
-            //        Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
-            //    }
-            //}
-            //if (Genital_Helper.has_vagina(p))
-            //{
-            //    gen = GetVagina(p);
-            //    if (gen is null) Log("Vagina is NULL.");
-            //    else
-            //    {
-            //        Log("Vagina: " + gen.def + " (" + gen.Severity + " size)");
-            //        Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
-            //    }
-            //}
-            //if (rjw.Genital_Helper.has_anus(p))
-            //{
-            //    gen = GetAnus(p);
-            //    if (gen is null) Log("Anus not found :/");
-            //    else
-            //    {
-            //        Log("Anus: " + gen.def + " (" + gen.Severity + " size)");
-            //        Log("Overall size: " + PenetrationUtility.GetOrganSize(gen));
-            //    }
-            //}
         }
 
         /// <summary>
@@ -90,8 +57,6 @@ namespace Dyspareunia
         /// <param name="sextype">Sex type (only Vaginal, Anal and Double Penetration are supported ATM)</param>
         public static void SexUtility_Prefix(Pawn pawn, Pawn partner, bool rape, xxx.rjwSextype sextype)
         {
-            //Log("SexUtility_Prefix");
-            //Log("Sex type: " + sextype);
             Log("* Initiator *");
             LogPawnData(pawn);
             Log("* Partner *");
@@ -119,12 +84,69 @@ namespace Dyspareunia
                 return;
 
             // Only contracts organs more than 0.5 in size
-            float oldSize = __instance.Severity;
             if (__instance.Severity <= 0.5)
                 return;
 
             // Contract the part by 1%
             __instance.Heal(0.01f);
+        }
+
+        static int lastBirthTick;
+        static List<Pawn> gaveBirthThisTick = new List<Pawn>();
+
+        /// <summary>
+        /// Harmony patch for childbirth damage
+        /// </summary>
+        /// <param name="__instance"></param>
+        /// <param name="baby"></param>
+        public static void Hediff_BasePregnancy_Patch(Pawn mother, Pawn baby)
+        {
+            if (mother?.health?.hediffSet is null)
+            {
+                Log("No hediffSet found for the mother!");
+                return;
+            }
+
+            Log("Hediff_BasePregnancy_Patch for " + mother?.Label);
+
+            // Checking if this mother has already given birth in current tick (damage applies only once)
+            if ((lastBirthTick = Find.TickManager.TicksGame) != lastBirthTick)
+                gaveBirthThisTick.Clear();
+            else if (gaveBirthThisTick.Contains(mother))
+            {
+                Log("This mother has already given birth this tick. No more damage is applied.");
+                return;
+            }
+
+            // Remember this mother, so as not to apply damage again if she has several babies
+            gaveBirthThisTick.Add(mother);
+
+            Hediff vagina = GetVagina(mother);
+            if (vagina?.Part is null)
+            {
+                Log("No vagina found!");
+                return;
+            }
+
+            Log("Vagina original size: " + vagina.Severity + "; effective size: " + PenetrationUtility.GetOrganSize(vagina) + "; HP: " + vagina.Part.def.hitPoints);
+
+            double babySize;
+            if (baby is null)
+            {
+                Log("Baby not found! Assuming it is 25% the size of the mother.");
+                babySize = mother.BodySize * 0.25;
+            }
+            else babySize = baby.BodySize;
+            Log("Baby size: " + babySize);
+
+            double damage = (babySize / PenetrationUtility.GetOrganSize(vagina) * 30 - 1) * vagina.Part.def.hitPoints / 12 * Rand.Range(0.75f, 1.25f);
+            Log("Childbirth damage: " + damage + " HP");
+            if (damage > 0)
+            {
+                PenetrationUtility.StretchOrgan(vagina, damage);
+                damage *= Math.Max(1 - PenetrationUtility.GetWetness(vagina) * 0.5, 0.4);
+                PenetrationUtility.AddHediff("SexStretch", damage, vagina, null);
+            }
         }
     }
 }
