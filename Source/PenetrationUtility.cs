@@ -221,13 +221,9 @@ namespace Dyspareunia
 
             double biggest = 0;
             foreach (BodyPartRecord bpr in pawn.RaceProps.body.AllParts)
-                if (bpr.def.defName == "Finger")
-                {
-                    Dyspareunia.Log("Finger '" + bpr.Label + "' of coverage " + bpr.coverage + " found.");
-                    if (!pawn.health.hediffSet.PartIsMissing(bpr)) biggest = Math.Max(bpr.coverage, biggest);
-                    else Dyspareunia.Log("But it is missing :(");
-                }
-            Dyspareunia.Log("Finger size: " + (biggest * pawn.BodySize * 10));
+                if (bpr.def.defName == "Finger" && !pawn.health.hediffSet.PartIsMissing(bpr))
+                    biggest = Math.Max(bpr.coverage, biggest);
+            Dyspareunia.Log("Biggest finger coverage: " + biggest);
             return biggest * pawn.BodySize * 10;
         }
 
