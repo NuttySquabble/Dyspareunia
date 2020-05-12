@@ -3,18 +3,17 @@ using RimWorld;
 using rjw;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Verse;
-using Verse.AI;
+using HugsLib;
 
 namespace Dyspareunia
 {
-    [StaticConstructorOnStartup]
-    public static class Dyspareunia
+    //[StaticConstructorOnStartup]
+    public class Dyspareunia : ModBase
     {
         static Harmony harmony;
 
-        static Dyspareunia()
+        Dyspareunia()
         {
             Log("Dyspareunia is starting.");
             harmony = new Harmony("nuttysquabble.dyspareunia");
@@ -93,6 +92,8 @@ namespace Dyspareunia
 
         static int lastBirthTick;
         static List<Pawn> gaveBirthThisTick = new List<Pawn>();
+
+        public override string ModIdentifier => "Dyspareunia";
 
         /// <summary>
         /// Harmony patch for childbirth damage
