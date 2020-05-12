@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Verse;
 using HugsLib;
+using HugsLib.Settings;
 
 namespace Dyspareunia
 {
@@ -27,6 +28,18 @@ namespace Dyspareunia
         }
 
         internal static void Log(string message) => Verse.Log.Message("[Dyspareunia] " + DateTime.UtcNow + ": " + message);
+
+        // Settings
+        internal static SettingHandle<int> DamageFactor;
+        internal static SettingHandle<int> StretchFactor;
+        internal static SettingHandle<int> ContractionTime;
+
+        public override void DefsLoaded()
+        {
+            DamageFactor = Settings.GetHandle<int>("DamageFactor", "Damage Factor", "Percentage of damage taken from rubbing and stretch, compared to default values", 100);
+            StretchFactor = Settings.GetHandle<int>("StretchFactor", "Stretch Factor", "Percentage of organ stretch from sex and childbirth", 100);
+            ContractionTime = Settings.GetHandle<int>("ContractionTime", "Contraction Time", "How many days it takes for organs to naturally contract from maximum looseness to normal state", 30);
+        }
 
         public static bool HasPenetratingOrgan(Pawn pawn) => (Genital_Helper.has_penis(pawn) || Genital_Helper.has_penis_infertile(pawn) || Genital_Helper.has_ovipositorM(pawn)) && !Genital_Helper.penis_blocked(pawn);
 
@@ -87,7 +100,7 @@ namespace Dyspareunia
                 return;
 
             // Contract the part by 1%
-            __instance.Heal(0.01f);
+            __instance.Heal(0.3f / ContractionTime);
         }
 
         static int lastBirthTick;

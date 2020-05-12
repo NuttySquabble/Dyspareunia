@@ -1,4 +1,6 @@
-﻿using RimWorld;
+﻿using HugsLib;
+using HugsLib.Settings;
+using RimWorld;
 using rjw;
 using System;
 using System.Collections.Generic;
@@ -61,12 +63,10 @@ namespace Dyspareunia
             return amount / organ.pawn.BodySize * 0.1;
         }
 
-        public static float StretchFactor { get; set; } = 1;
-
         public static void StretchOrgan(Hediff organ, double amount)
         {
             if (amount <= 0) return;
-            float stretch = (float)amount / organ.Part.def.hitPoints * StretchFactor;
+            float stretch = (float)amount / organ.Part.def.hitPoints * Dyspareunia.StretchFactor / 100;
             Dyspareunia.Log("Stretching " + organ.def.defName + " (" + organ.Severity + " size) by " + stretch);
             organ.Severity += stretch;
         }
@@ -91,8 +91,8 @@ namespace Dyspareunia
 
             // Calculating damage amounts
             double relativeSize = penetratingOrganSize / GetOrganSize(orifice);
-            double rubbingDamage = 0.5;
-            double stretchDamage = Math.Max(relativeSize - 1, 0);
+            double rubbingDamage = 0.5 * Dyspareunia.DamageFactor / 100;
+            double stretchDamage = Math.Max(relativeSize - 1, 0) * Dyspareunia.DamageFactor / 100;
 
             if (relativeSize > 1.25) rubbingDamage *= 1.5; // If penetrating organ is much bigger than the orifice, rubbing damage is higher
             
