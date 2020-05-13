@@ -24,7 +24,7 @@ namespace Dyspareunia
             DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(damageDefName);
             if (damageDef == null)
             {
-                Dyspareunia.Log("No DamageDef '" + damageDefName + "' found.");
+                Dyspareunia.Log("No DamageDef '" + damageDefName + "' found.", true);
                 return;
             }
             DamageInfo damageInfo = new DamageInfo(damageDef, (float)damage, instigator: instigator, hitPart: orifice.Part);
@@ -32,7 +32,7 @@ namespace Dyspareunia
             HediffDef hediffDef = damageDef.hediff;
             if (hediffDef == null)
             {
-                Dyspareunia.Log("No HediffDef for '" + damageDef.label + "' found.");
+                Dyspareunia.Log("No HediffDef for '" + damageDef.label + "' found.", true);
                 return;
             }
             Hediff hediff = HediffMaker.MakeHediff(hediffDef, orifice.pawn, orifice.Part);
@@ -78,13 +78,13 @@ namespace Dyspareunia
             // Checking validity of penetrator and target
             if (penetrator is null)
             {
-                Dyspareunia.Log("Penetrator not found!");
+                Dyspareunia.Log("Penetrator not found!", true);
                 return;
             }
             Pawn target = orifice?.pawn;
             if (target is null)
             {
-                Dyspareunia.Log("Orifice/target not found!");
+                Dyspareunia.Log("Orifice/target not found!", true);
                 return;
             }
             Dyspareunia.Log("Applying damage from " + penetrator.Label + " (effective size " + penetratingOrganSize + ") penetrating " + target.Label + "'s " + orifice.def.defName + " (effective size " + GetOrganSize(orifice) + ").");
@@ -215,7 +215,7 @@ namespace Dyspareunia
         {
             if (pawn?.RaceProps?.body is null)
             {
-                Dyspareunia.Log("The pawn has no body!");
+                Dyspareunia.Log("The pawn " + pawn?.Label + " has no body!", true);
                 return 0;
             }
 
@@ -236,19 +236,19 @@ namespace Dyspareunia
         {
             if (pawn?.RaceProps?.body is null)
             {
-                Dyspareunia.Log("The pawn has no body!");
+                Dyspareunia.Log("The pawn " + pawn?.Label + " has no body!", true);
                 return 0;
             }
             if (pawn?.health?.hediffSet is null)
             {
-                Dyspareunia.Log("The pawn has no hediffSet.");
+                Dyspareunia.Log("The pawn " + pawn?.Label + " has no hediffSet.", true);
                 return 0;
             }
 
             List<BodyPartRecord> parts = (List<BodyPartRecord>)pawn.RaceProps.body.GetPartsWithDef(BodyPartDefOf.Hand);
             if (parts is null)
             {
-                Dyspareunia.Log(pawn + " has no hands!");
+                Dyspareunia.Log(pawn + " has no hands!", true);
                 return 0;
             }
             Dyspareunia.Log(pawn.Label + " has " + parts.Count + " hands.");
