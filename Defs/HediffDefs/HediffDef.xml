@@ -6,6 +6,9 @@
 		<displayWound>false</displayWound>
 		<stages>
 			<li>
+				<label>minor</label>
+			</li>
+			<li>
 				<minSeverity>1</minSeverity>
 				<capMods>
 					<li>
@@ -51,7 +54,7 @@
 			</li>
 		</comps>
 		<injuryProps>
-			<painPerSeverity>0.02</painPerSeverity>
+			<painPerSeverity>0.025</painPerSeverity>
 			<averagePainPerSeverityPermanent>0.01</averagePainPerSeverityPermanent>
 			<canMerge>true</canMerge>
 			<destroyedLabel>Torn off</destroyedLabel>
@@ -78,7 +81,7 @@
 			</li>
 		</comps>
 		<injuryProps>
-			<painPerSeverity>0.02</painPerSeverity>
+			<painPerSeverity>0.025</painPerSeverity>
 			<averagePainPerSeverityPermanent>0.01</averagePainPerSeverityPermanent>
 			<bleedRate>0.06</bleedRate>
 			<canMerge>true</canMerge>
