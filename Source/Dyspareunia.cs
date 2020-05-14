@@ -28,7 +28,7 @@ namespace Dyspareunia
 
         internal static void Log(string message, bool important = false)
         {
-            if (important || DebugLogging)
+            if (important || (DebugLogging is null) || DebugLogging)
                 Verse.Log.Message("[Dyspareunia] " + DateTime.UtcNow + ": " + message);
         }
 
