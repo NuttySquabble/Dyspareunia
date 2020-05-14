@@ -3,20 +3,19 @@ using RimWorld;
 using rjw;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Verse;
-using Verse.AI;
+using HugsLib;
+using HugsLib.Settings;
 
 namespace Dyspareunia
 {
-    [StaticConstructorOnStartup]
-    public static class Dyspareunia
+    //[StaticConstructorOnStartup]
+    public class Dyspareunia : ModBase
     {
         static Harmony harmony;
 
-        static Dyspareunia()
+        Dyspareunia()
         {
-            Log("Dyspareunia is starting.");
             harmony = new Harmony("nuttysquabble.dyspareunia");
 
             harmony.Patch(typeof(SexUtility).GetMethod("Aftersex", new Type[] { typeof(Pawn), typeof(Pawn), typeof(bool), typeof(bool), typeof(bool), typeof(xxx.rjwSextype) }), prefix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Prefix")));
@@ -27,7 +26,25 @@ namespace Dyspareunia
             Log("Dyspareunia initialization is complete. " + harmony.GetPatchedMethods().EnumerableCount() + " patches applied.");
         }
 
-        internal static void Log(string message) => Verse.Log.Message("[Dyspareunia] " + DateTime.UtcNow + ": " + message);
+        internal static void Log(string message, bool important = false)
+        {
+            if (important || (DebugLogging is null) || DebugLogging)
+                Verse.Log.Message("[Dyspareunia] " + DateTime.UtcNow + ": " + message);
+        }
+
+        // Settings
+        internal static SettingHandle<int> DamageFactor;
+        internal static SettingHandle<int> StretchFactor;
+        internal static SettingHandle<int> ContractionTime;
+        internal static SettingHandle<bool> DebugLogging;
+
+        public override void DefsLoaded()
+        {
+            DamageFactor = Settings.GetHandle<int>("DamageFactor", "Damage Factor", "Percentage of damage taken from rubbing and stretch, compared to default values", 100);
+            StretchFactor = Settings.GetHandle<int>("StretchFactor", "Stretch Factor", "Percentage of organ stretch from sex and childbirth", 100);
+            ContractionTime = Settings.GetHandle<int>("ContractionTime", "Contraction Time", "How many days it takes for organs to naturally contract from maximum looseness to normal state", 30);
+            DebugLogging = Settings.GetHandle<bool>("DebugLogging", "Debug Logging", "Enable verbose logging, use to report bugs");
+        }
 
         public static bool HasPenetratingOrgan(Pawn pawn) => (Genital_Helper.has_penis(pawn) || Genital_Helper.has_penis_infertile(pawn) || Genital_Helper.has_ovipositorM(pawn)) && !Genital_Helper.penis_blocked(pawn);
 
@@ -41,7 +58,7 @@ namespace Dyspareunia
         {
             if (p is null)
             {
-                Log("Pawn is NULL.");
+                Log("Pawn is NULL.", true);
                 return;
             }
             Log("Pawn: " + p.Label);
@@ -88,11 +105,13 @@ namespace Dyspareunia
                 return;
 
             // Contract the part by 1%
-            __instance.Heal(0.01f);
+            __instance.Heal(0.3f / ContractionTime);
         }
 
         static int lastBirthTick;
         static List<Pawn> gaveBirthThisTick = new List<Pawn>();
+
+        public override string ModIdentifier => "Dyspareunia";
 
         /// <summary>
         /// Harmony patch for childbirth damage
@@ -103,7 +122,8 @@ namespace Dyspareunia
         {
             if (mother?.health?.hediffSet is null)
             {
-                Log("No hediffSet found for the mother!");
+                Log("No hediffSet found for the mother!", true);
+                if (mother != null) Log("Mother: " + mother.Label, true);
                 return;
             }
 
@@ -124,7 +144,7 @@ namespace Dyspareunia
             Hediff vagina = GetVagina(mother);
             if (vagina?.Part is null)
             {
-                Log("No vagina found!");
+                Log("No vagina found for " + mother.Label + "!", true);
                 return;
             }
 
@@ -133,7 +153,7 @@ namespace Dyspareunia
             double babySize;
             if (baby is null)
             {
-                Log("Baby not found! Assuming it is 25% the size of the mother.");
+                Log("Baby not found for " + mother.Label + "! Assuming it is 25% the size of the mother.", true);
                 babySize = mother.BodySize * 0.25;
             }
             else babySize = baby.BodySize;

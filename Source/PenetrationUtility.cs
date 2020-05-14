@@ -1,4 +1,6 @@
-﻿using RimWorld;
+﻿using HugsLib;
+using HugsLib.Settings;
+using RimWorld;
 using rjw;
 using System;
 using System.Collections.Generic;
@@ -22,7 +24,7 @@ namespace Dyspareunia
             DamageDef damageDef = DefDatabase<DamageDef>.GetNamed(damageDefName);
             if (damageDef == null)
             {
-                Dyspareunia.Log("No DamageDef '" + damageDefName + "' found.");
+                Dyspareunia.Log("No DamageDef '" + damageDefName + "' found.", true);
                 return;
             }
             DamageInfo damageInfo = new DamageInfo(damageDef, (float)damage, instigator: instigator, hitPart: orifice.Part);
@@ -30,7 +32,7 @@ namespace Dyspareunia
             HediffDef hediffDef = damageDef.hediff;
             if (hediffDef == null)
             {
-                Dyspareunia.Log("No HediffDef for '" + damageDef.label + "' found.");
+                Dyspareunia.Log("No HediffDef for '" + damageDef.label + "' found.", true);
                 return;
             }
             Hediff hediff = HediffMaker.MakeHediff(hediffDef, orifice.pawn, orifice.Part);
@@ -61,12 +63,10 @@ namespace Dyspareunia
             return amount / organ.pawn.BodySize * 0.1;
         }
 
-        public static float StretchFactor { get; set; } = 1;
-
         public static void StretchOrgan(Hediff organ, double amount)
         {
             if (amount <= 0) return;
-            float stretch = (float)amount / organ.Part.def.hitPoints * StretchFactor;
+            float stretch = (float)amount / organ.Part.def.hitPoints * Dyspareunia.StretchFactor / 100;
             Dyspareunia.Log("Stretching " + organ.def.defName + " (" + organ.Severity + " size) by " + stretch);
             organ.Severity += stretch;
         }
@@ -78,21 +78,21 @@ namespace Dyspareunia
             // Checking validity of penetrator and target
             if (penetrator is null)
             {
-                Dyspareunia.Log("Penetrator not found!");
+                Dyspareunia.Log("Penetrator not found!", true);
                 return;
             }
             Pawn target = orifice?.pawn;
             if (target is null)
             {
-                Dyspareunia.Log("Orifice/target not found!");
+                Dyspareunia.Log("Orifice/target not found!", true);
                 return;
             }
             Dyspareunia.Log("Applying damage from " + penetrator.Label + " (effective size " + penetratingOrganSize + ") penetrating " + target.Label + "'s " + orifice.def.defName + " (effective size " + GetOrganSize(orifice) + ").");
 
             // Calculating damage amounts
             double relativeSize = penetratingOrganSize / GetOrganSize(orifice);
-            double rubbingDamage = 0.5;
-            double stretchDamage = Math.Max(relativeSize - 1, 0);
+            double rubbingDamage = 0.5 * Dyspareunia.DamageFactor / 100;
+            double stretchDamage = Math.Max(relativeSize - 1, 0) * Dyspareunia.DamageFactor / 100;
 
             if (relativeSize > 1.25) rubbingDamage *= 1.5; // If penetrating organ is much bigger than the orifice, rubbing damage is higher
             
@@ -215,19 +215,15 @@ namespace Dyspareunia
         {
             if (pawn?.RaceProps?.body is null)
             {
-                Dyspareunia.Log("The pawn has no body!");
+                Dyspareunia.Log("The pawn " + pawn?.Label + " has no body!", true);
                 return 0;
             }
 
             double biggest = 0;
             foreach (BodyPartRecord bpr in pawn.RaceProps.body.AllParts)
-                if (bpr.def.defName == "Finger")
-                {
-                    Dyspareunia.Log("Finger '" + bpr.Label + "' of coverage " + bpr.coverage + " found.");
-                    if (!pawn.health.hediffSet.PartIsMissing(bpr)) biggest = Math.Max(bpr.coverage, biggest);
-                    else Dyspareunia.Log("But it is missing :(");
-                }
-            Dyspareunia.Log("Finger size: " + (biggest * pawn.BodySize * 10));
+                if (bpr.def.defName == "Finger" && !pawn.health.hediffSet.PartIsMissing(bpr))
+                    biggest = Math.Max(bpr.coverage, biggest);
+            Dyspareunia.Log("Biggest finger coverage: " + biggest);
             return biggest * pawn.BodySize * 10;
         }
 
@@ -240,19 +236,19 @@ namespace Dyspareunia
         {
             if (pawn?.RaceProps?.body is null)
             {
-                Dyspareunia.Log("The pawn has no body!");
+                Dyspareunia.Log("The pawn " + pawn?.Label + " has no body!", true);
                 return 0;
             }
             if (pawn?.health?.hediffSet is null)
             {
-                Dyspareunia.Log("The pawn has no hediffSet.");
+                Dyspareunia.Log("The pawn " + pawn?.Label + " has no hediffSet.", true);
                 return 0;
             }
 
             List<BodyPartRecord> parts = (List<BodyPartRecord>)pawn.RaceProps.body.GetPartsWithDef(BodyPartDefOf.Hand);
             if (parts is null)
             {
-                Dyspareunia.Log(pawn + " has no hands!");
+                Dyspareunia.Log(pawn + " has no hands!", true);
                 return 0;
             }
             Dyspareunia.Log(pawn.Label + " has " + parts.Count + " hands.");

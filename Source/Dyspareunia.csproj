@@ -42,6 +42,10 @@
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="HugsLib">
+      <HintPath>..\..\HugsLib\Assemblies\HugsLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="RJW">
       <HintPath>..\..\RJW\1.1\Assemblies\RJW.dll</HintPath>
       <Private>False</Private>
