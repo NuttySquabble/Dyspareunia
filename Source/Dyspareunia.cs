@@ -9,7 +9,6 @@ using HugsLib.Settings;
 
 namespace Dyspareunia
 {
-    //[StaticConstructorOnStartup]
     public class Dyspareunia : ModBase
     {
         static Harmony harmony;
@@ -46,11 +45,25 @@ namespace Dyspareunia
             DebugLogging = Settings.GetHandle<bool>("DebugLogging", "Debug Logging", "Enable verbose logging, use to report bugs");
         }
 
-        public static bool HasPenetratingOrgan(Pawn pawn) => (Genital_Helper.has_penis(pawn) || Genital_Helper.has_penis_infertile(pawn) || Genital_Helper.has_ovipositorM(pawn)) && !Genital_Helper.penis_blocked(pawn);
+        public static bool HasPenetratingOrgan(Pawn pawn) => (Genital_Helper.has_penis_fertile(pawn) || Genital_Helper.has_penis_infertile(pawn) || Genital_Helper.has_multipenis(pawn) || Genital_Helper.has_ovipositorM(pawn)) && !Genital_Helper.penis_blocked(pawn);
+
+        public static Hediff GetPenis(Pawn pawn)
+        {
+            BodyPartRecord penisPart = Genital_Helper.get_genitalsBPR(pawn);
+            return penisPart is null
+                ? null
+                : pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == penisPart && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
+        }
 
         public static Hediff GetVagina(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical) && hed.def.defName.ToLower().Contains("vagina"));
 
-        public static Hediff GetAnus(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == Genital_Helper.get_anus(pawn) && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
+        public static Hediff GetAnus(Pawn pawn)
+        {
+            BodyPartRecord anusPart = Genital_Helper.get_anusBPR(pawn);
+            return anusPart is null
+                ? null
+                : pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == anusPart && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
+        }
 
         public static bool IsOrifice(Hediff hediff) => (hediff is Hediff_PartBaseNatural || hediff is Hediff_PartBaseArtifical) && (hediff.def.defName.ToLower().Contains("vagina") || hediff.def.defName.ToLower().Contains("anus"));
 

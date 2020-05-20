@@ -94,7 +94,8 @@ namespace Dyspareunia
             double rubbingDamage = 0.5 * Dyspareunia.DamageFactor / 100;
             double stretchDamage = Math.Max(relativeSize - 1, 0) * Dyspareunia.DamageFactor / 100;
 
-            if (relativeSize > 1.25) rubbingDamage *= 1.5; // If penetrating organ is much bigger than the orifice, rubbing damage is higher
+            if (relativeSize > 1.25)
+                rubbingDamage *= 1.5; // If penetrating organ is much bigger than the orifice, rubbing damage is higher
             
             if (isRape) // Rape is rough
             {
@@ -273,14 +274,14 @@ namespace Dyspareunia
             {
                 case xxx.rjwSextype.Vaginal:
                     if (Dyspareunia.HasPenetratingOrgan(p1) && Genital_Helper.has_vagina(p2))
-                        ApplyDamage(Genital_Helper.get_penis_all(p1), Dyspareunia.GetVagina(p2), rape);
-                    else ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetVagina(p1), false);
+                        ApplyDamage(Dyspareunia.GetPenis(p1), Dyspareunia.GetVagina(p2), rape);
+                    else ApplyDamage(Dyspareunia.GetPenis(p2), Dyspareunia.GetVagina(p1), false);
                     break;
 
                 case xxx.rjwSextype.Anal:
                     if (Dyspareunia.HasPenetratingOrgan(p1) && Genital_Helper.has_anus(p2))
-                        ApplyDamage(Genital_Helper.get_penis_all(p1), Dyspareunia.GetAnus(p2), rape);
-                    else ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetAnus(p1), false);
+                        ApplyDamage(Dyspareunia.GetPenis(p1), Dyspareunia.GetAnus(p2), rape);
+                    else ApplyDamage(Dyspareunia.GetPenis(p2), Dyspareunia.GetAnus(p1), false);
                     break;
 
                 case xxx.rjwSextype.Oral:
@@ -290,13 +291,13 @@ namespace Dyspareunia
                 case xxx.rjwSextype.DoublePenetration:
                     if (Genital_Helper.has_multipenis(p1) && Genital_Helper.has_vagina(p2) && Genital_Helper.has_anus(p2))
                     {
-                        ApplyDamage(Genital_Helper.get_penis_all(p1), Dyspareunia.GetVagina(p2), rape);
-                        ApplyDamage(Genital_Helper.get_penis_all(p1), Dyspareunia.GetAnus(p2), rape);
+                        ApplyDamage(Dyspareunia.GetPenis(p1), Dyspareunia.GetVagina(p2), rape);
+                        ApplyDamage(Dyspareunia.GetPenis(p1), Dyspareunia.GetAnus(p2), rape);
                     }
                     else
                     {
-                        ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetVagina(p1), false);
-                        ApplyDamage(Genital_Helper.get_penis_all(p2), Dyspareunia.GetAnus(p1), false);
+                        ApplyDamage(Dyspareunia.GetPenis(p2), Dyspareunia.GetVagina(p1), false);
+                        ApplyDamage(Dyspareunia.GetPenis(p2), Dyspareunia.GetAnus(p1), false);
                     }
                     break;
 
