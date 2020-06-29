@@ -67,6 +67,7 @@
     <Compile Include="Dyspareunia.cs" />
     <Compile Include="PenetrationUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RJWEx_Patches.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

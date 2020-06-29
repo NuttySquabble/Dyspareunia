@@ -12,7 +12,7 @@ namespace Dyspareunia
     {
         // Returns the size of an organ; 0.5 to 1.5 for (normal) anus; 1 to 2 for other organs
         public static double GetOrganSize(Hediff organ) =>
-            ((organ.def.defName.ToLower().Contains("anus") ? 0.5 : 1) + organ.Severity) * organ.pawn.BodySize;  // Assume max natural organ size is 2x bigger than the smallest
+            ((Dyspareunia.IsAnus(organ) ? 0.5 : 1) + organ.Severity) * organ.pawn.BodySize;  // Assume max natural organ size is 2x bigger than the smallest
 
         public static void AddHediff(string damageDefName, double damage, Hediff orifice, Pawn instigator)
         {
@@ -65,7 +65,8 @@ namespace Dyspareunia
 
         public static void StretchOrgan(Hediff organ, double amount)
         {
-            if (amount <= 0) return;
+            if (amount <= 0)
+                return;
             float stretch = (float)amount / organ.Part.def.hitPoints * Dyspareunia.StretchFactor / 100;
             Dyspareunia.Log("Stretching " + organ.def.defName + " (" + organ.Severity + " size) by " + stretch);
             organ.Severity += stretch;
@@ -73,25 +74,20 @@ namespace Dyspareunia
 
         static readonly TraitDef wimpTraitDef = TraitDef.Named("Wimp");
 
-        public static void ApplyDamage(Pawn penetrator, double penetratingOrganSize, Hediff orifice, bool isRape)
+        public static void ApplyDamage(Pawn penetrator, double penetratingOrganSize, Hediff orifice, bool isRape, bool applyRubbingDamage = true)
         {
-            // Checking validity of penetrator and target
-            if (penetrator is null)
-            {
-                Dyspareunia.Log("Penetrator not found!", true);
-                return;
-            }
+            // Checking validity of target
             Pawn target = orifice?.pawn;
             if (target is null)
             {
                 Dyspareunia.Log("Orifice/target not found!", true);
                 return;
             }
-            Dyspareunia.Log("Applying damage from " + penetrator.Label + " (effective size " + penetratingOrganSize + ") penetrating " + target.Label + "'s " + orifice.def.defName + " (effective size " + GetOrganSize(orifice) + ").");
+            Dyspareunia.Log("Applying damage from " + penetrator + " (effective size " + penetratingOrganSize + ") penetrating " + target.Label + "'s " + orifice.def.defName + " (effective size " + GetOrganSize(orifice) + ").");
 
             // Calculating damage amounts
             double relativeSize = penetratingOrganSize / GetOrganSize(orifice);
-            double rubbingDamage = 0.5 * Dyspareunia.DamageFactor / 100;
+            double rubbingDamage = applyRubbingDamage ? 0.5 * Dyspareunia.DamageFactor / 100 : 0;
             double stretchDamage = Math.Max(relativeSize - 1, 0) * Dyspareunia.DamageFactor / 100;
 
             if (relativeSize > 1.25)
@@ -103,7 +99,7 @@ namespace Dyspareunia
                 stretchDamage *= 1.5;
             }
 
-            if (penetrator.story?.traits != null)
+            if (penetrator?.story?.traits != null)
             {
                 if (penetrator.story.traits.HasTrait(TraitDefOf.Bloodlust))
                 {
@@ -197,7 +193,7 @@ namespace Dyspareunia
             // Applying positive moodlets for a big dick
             if (relativeSize > 1.25)
             {
-                if (penetrator.needs?.mood?.thoughts?.memories != null)
+                if (penetrator?.needs?.mood?.thoughts?.memories != null)
                     penetrator.needs.mood.thoughts.memories.TryGainMemory(ThoughtMaker.MakeThought(ThoughtDef.Named("TightLovin"), relativeSize < 2 ? 0 : 1));
                 if (!isRape && target.needs?.mood?.thoughts?.memories != null)
                     target.needs.mood.thoughts.memories.TryGainMemory(ThoughtMaker.MakeThought(ThoughtDef.Named("BigDick"), relativeSize < 2 ? 0 : 1));
