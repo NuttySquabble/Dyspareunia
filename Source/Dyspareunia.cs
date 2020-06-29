@@ -41,7 +41,7 @@ namespace Dyspareunia
         {
             DamageFactor = Settings.GetHandle<int>("DamageFactor", "Damage Factor", "Percentage of damage taken from rubbing and stretch, compared to default values", 100);
             StretchFactor = Settings.GetHandle<int>("StretchFactor", "Stretch Factor", "Percentage of organ stretch from sex and childbirth", 100);
-            ContractionTime = Settings.GetHandle<int>("ContractionTime", "Contraction Time", "How many days it takes for organs to naturally contract from maximum looseness to normal state", 30);
+            ContractionTime = Settings.GetHandle<int>("ContractionTime", "Contraction Time", "How many days it takes for organs to naturally contract from maximum looseness to normal state (0 to disable contraction)", 30);
             DebugLogging = Settings.GetHandle<bool>("DebugLogging", "Debug Logging", "Enable verbose logging, use to report bugs");
         }
 
@@ -103,6 +103,10 @@ namespace Dyspareunia
         {
             // Only runs once per 14 hours 40 minutes (to contract by 50% in 30 days)
             if (__instance.ageTicks % 36000 != 0)
+                return;
+
+            // If Contraction Time setting is set 0, contraction is disabled
+            if (ContractionTime <= 0)
                 return;
 
             // Skip unspawned pawns
