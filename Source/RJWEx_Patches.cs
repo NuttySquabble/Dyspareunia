@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using Verse;
 using rjw;
+using Verse.AI;
 
 namespace Dyspareunia
 {
@@ -22,6 +23,14 @@ namespace Dyspareunia
                 Dyspareunia.Log(e.Message, true);
                 return;
             }
+        }
+
+        public static void JobDriver_UseFM_stopSession(JobDriver __instance)
+        {
+            Dyspareunia.Log("RJWEx_Patches.JobDriver_UseFM_stopSession for " + __instance.pawn);
+            Hediff orifice = Dyspareunia.GetOrifice(__instance.pawn);
+            if (orifice != null)
+                PenetrationUtility.ApplyDamage(null, 1.5, orifice, false);
         }
     }
 }

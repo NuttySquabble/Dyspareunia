@@ -19,14 +19,19 @@ namespace Dyspareunia
         {
             harmony = new Harmony("nuttysquabble.dyspareunia");
 
+            // Patches for RJW
             harmony.Patch(typeof(SexUtility).GetMethod("Aftersex", new Type[] { typeof(Pawn), typeof(Pawn), typeof(bool), typeof(bool), typeof(bool), typeof(xxx.rjwSextype) }), prefix: new HarmonyMethod(typeof(Dyspareunia).GetMethod("SexUtility_Prefix")));
             harmony.Patch(typeof(Hediff_PartBaseNatural).GetMethod("Tick"), postfix: new HarmonyMethod(GetType().GetMethod("PartBase_Tick_Postfix")));
             harmony.Patch(typeof(Hediff_PartBaseArtifical).GetMethod("Tick"), postfix: new HarmonyMethod(GetType().GetMethod("PartBase_Tick_Postfix")));
             harmony.Patch(typeof(Hediff_BasePregnancy).GetMethod("PostBirth"), postfix: new HarmonyMethod(GetType().GetMethod("Hediff_BasePregnancy_Patch")));
 
+            // Patches for RJW-Ex
             MethodInfo methodInfo = AccessTools.Method("rjwex.anal_plug_soul:on_wear");
             if (methodInfo != null)
                 harmony.Patch(methodInfo, postfix: new HarmonyMethod(typeof(RJWEx_Patches).GetMethod("anal_plug_soul_on_wear_Patch")));
+            methodInfo = AccessTools.Method("rjwex.JobDriver_UseFM:stopSession");
+            if (methodInfo != null)
+                harmony.Patch(methodInfo, postfix: new HarmonyMethod(typeof(RJWEx_Patches).GetMethod("JobDriver_UseFM_stopSession")));
 
             Log("Dyspareunia initialization is complete. " + harmony.GetPatchedMethods().EnumerableCount() + " patches applied.");
         }
@@ -70,6 +75,8 @@ namespace Dyspareunia
                 ? null
                 : pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.Part == anusPart && (hed is Hediff_PartBaseNatural || hed is Hediff_PartBaseArtifical));
         }
+
+        public static Hediff GetOrifice(Pawn pawn) => GetVagina(pawn) ?? GetAnus(pawn);
 
         public static bool IsOrifice(Hediff hediff) => (hediff is Hediff_PartBaseNatural || hediff is Hediff_PartBaseArtifical) && (hediff.def.defName.ToLower().Contains("vagina") || hediff.def.defName.ToLower().Contains("anus"));
 
@@ -127,6 +134,7 @@ namespace Dyspareunia
             if (!IsOrifice(__instance))
                 return;
 
+            // If current orifice is an anus, checking if there is an anal plug from rjw-ex mod
             if (IsAnus(__instance) && __instance?.pawn?.apparel != null)
             {
                 Thing plug = __instance.pawn.apparel.WornApparel.FirstOrDefault(a => a.def.thingClass.FullName == "rjwex.anal_plug");
@@ -135,15 +143,17 @@ namespace Dyspareunia
                     Log(plug.LabelCap + " found in " + __instance.pawn + "'s " + __instance);
                     try
                     {
+                        // Using reflection to access the plug size (without adding rjw-ex as a reference) and convert it to Dyspareunia's size
                         int rjwSize = (int)AccessTools.Field(plug.def.GetType(), "plug_size").GetValue(plug.def);
                         Log(__instance.pawn + " has a " + rjwSize + "-sized plug in their " + __instance.Label);
                         double plugSize = GetPlugSize(rjwSize, __instance);
                         double organSize = PenetrationUtility.GetOrganSize(__instance);
-                        float plugStretch = (float)(plugSize - organSize) / __instance.pawn.BodySize;
-                        if (plugStretch > 0)
+                        if (plugSize > organSize)
                         {
+                            // Stretching the orifice gradually if the plug is bigger than it
+                            float plugStretch = (float)(plugSize - organSize) / __instance.pawn.BodySize / ContractionTime;
                             Log("Stretching " + __instance.Label + " by " + plugStretch.ToString("P1"));
-                            __instance.Severity += plugStretch / ContractionTime;
+                            __instance.Severity += plugStretch;
                         }
                     }
                     catch (Exception e)
@@ -151,7 +161,7 @@ namespace Dyspareunia
                 }
             }
 
-            // Only contracts organs more than 0.5 in size
+            // Only contract organs more than 0.5 in severity
             if (__instance.Severity <= 0.5)
                 return;
 
